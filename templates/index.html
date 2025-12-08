@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Costing Automation Tool - Rhea Engineering</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 1.5em;
+            margin: 0;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 0.9em;
+            margin: 0;
+        }
+
+        .main-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 15px;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .file-input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .file-input-group label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .file-input {
+            padding: 10px;
+            border: 2px dashed #667eea;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+            font-size: 0.9em;
+        }
+
+        .file-input:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .file-name {
+            margin-top: 5px;
+            color: #667eea;
+            font-weight: 500;
+            font-size: 0.85em;
+        }
+
+        .upload-btn-wrapper {
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .btn {
+            padding: 11px 24px;
+            font-size: 0.95em;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #28a745;
+            color: white;
+            margin-right: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #218838;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.active {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .results {
+            display: none;
+            margin-top: 15px;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .results-header h2 {
+            color: #333;
+            font-size: 1.2em;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab:hover {
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            padding: 8px 10px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            font-size: 0.9em;
+        }
+
+        td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 0.85em;
+        }
+
+        tr:hover {
+            background: #f8f9ff;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+
+        .summary-card h3 {
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .stat {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 1.4em;
+            font-weight: 700;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 10px 12px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+
+        .info-box h4 {
+            color: #1976D2;
+            margin-bottom: 6px;
+            font-size: 1em;
+        }
+
+        .info-box ul {
+            margin-left: 18px;
+            color: #333;
+        }
+
+        .info-box li {
+            margin-bottom: 3px;
+        }
+
+        .ot-selection {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+        }
+
+        .ot-selection.active {
+            display: block;
+        }
+
+        .ot-selection h3 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .ot-selection > p {
+            margin-bottom: 12px;
+            font-size: 0.9em;
+        }
+
+        .ot-employee-section {
+            background: white;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .ot-employee-header {
+            font-weight: 600;
+            font-size: 1em;
+            color: #333;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .ot-jobs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 10px;
+        }
+
+        .ot-job-item {
+            padding: 10px;
+            background: #f8f9ff;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            font-size: 0.9em;
+        }
+
+        .ot-job-info {
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .ot-job-info strong {
+            color: #667eea;
+        }
+
+        .ot-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ot-input-group label {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9em;
+        }
+
+        .ot-input-group input {
+            padding: 6px 10px;
+            border: 2px solid #667eea;
+            border-radius: 4px;
+            font-size: 0.9em;
+            width: 100px;
+        }
+
+        .ot-submit-btn {
+            margin-top: 12px;
+            width: 100%;
+        }
+
+        .ot-warning {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 8px;
+            border-radius: 4px;
+            margin-top: 8px;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Job Costing Automation Tool</h1>
+                <p>Rhea Engineering - Transform 6-8 hours of work into 30 minutes</p>
+            </div>
+        </div>
+
+        <div class="main-card">
+            <div class="info-box">
+                <h4>Quick Start</h4>
+                <ul>
+                    <li>Export Week 1 and Week 2 payroll data from Paychex</li>
+                    <li>Upload both files, click Process, and download your Excel report</li>
+                </ul>
+            </div>
+
+            <div class="alert alert-success" id="successAlert"></div>
+            <div class="alert alert-error" id="errorAlert"></div>
+
+            <form id="uploadForm" class="upload-section">
+                <div class="file-input-group">
+                    <label for="week1File">Week 1 Paychex File</label>
+                    <input type="file" id="week1File" name="week1File" class="file-input" accept=".txt,.csv,.xlsx,.xls" required>
+                    <div class="file-name" id="week1FileName"></div>
+                </div>
+
+                <div class="file-input-group">
+                    <label for="week2File">Week 2 Paychex File</label>
+                    <input type="file" id="week2File" name="week2File" class="file-input" accept=".txt,.csv,.xlsx,.xls" required>
+                    <div class="file-name" id="week2FileName"></div>
+                </div>
+
+                <div class="upload-btn-wrapper">
+                    <button type="submit" class="btn btn-primary" id="processBtn">
+                        Process Files
+                    </button>
+                </div>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processing your files...</p>
+            </div>
+
+            <div class="ot-selection" id="otSelection">
+                <h3>Overtime Detected - Select Job Allocation</h3>
+                <p style="color: #856404; margin-bottom: 20px;">
+                    Overtime hours have been detected for one or more employees. Please allocate the overtime hours to specific jobs below.
+                </p>
+                <div id="otEmployees"></div>
+                <button class="btn btn-primary ot-submit-btn" id="otSubmitBtn">
+                    Process with Selected OT Allocations
+                </button>
+            </div>
+
+            <div class="results" id="results">
+                <div class="results-header">
+                    <h2>Job Costing Results</h2>
+                    <button class="btn btn-secondary" id="downloadBtn">
+                        Download Excel File
+                    </button>
+                </div>
+
+                <div class="summary-card" id="summaryCard">
+                    <h3>Summary Statistics</h3>
+                    <div class="summary-stats" id="summaryStats"></div>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab active" data-tab="totals">Employee Totals</button>
+                    <button class="tab" data-tab="summary">Job Costing Summary</button>
+                </div>
+
+                <div class="tab-content active" id="totals">
+                    <div class="table-container">
+                        <table id="totalsTable">
+                            <thead id="totalsTableHead"></thead>
+                            <tbody id="totalsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="summary">
+                    <div class="table-container">
+                        <table id="summaryTable">
+                            <thead id="summaryTableHead"></thead>
+                            <tbody id="summaryTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let outputFileName = '';
+        let currentSessionId = '';
+
+        // File input handlers
+        document.getElementById('week1File').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || '';
+            document.getElementById('week1FileName').textContent = fileName ? `Selected: ${fileName}` : '';
+        });
+
+        document.getElementById('week2File').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || '';
+            document.getElementById('week2FileName').textContent = fileName ? `Selected: ${fileName}` : '';
+        });
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabName = this.dataset.tab;
+
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                this.classList.add('active');
+                document.getElementById(tabName).classList.add('active');
+            });
+        });
+
+        // Form submission
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const processBtn = document.getElementById('processBtn');
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            const otSelection = document.getElementById('otSelection');
+
+            // Hide alerts, results, and OT selection
+            document.getElementById('successAlert').classList.remove('active');
+            document.getElementById('errorAlert').classList.remove('active');
+            results.classList.remove('active');
+            otSelection.classList.remove('active');
+
+            // Show loading
+            processBtn.disabled = true;
+            loading.classList.add('active');
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Check if OT selection is required
+                    if (data.requires_ot_selection) {
+                        currentSessionId = data.session_id;
+                        displayOTSelection(data.ot_data);
+                        showAlert('success', 'Files uploaded. Please allocate overtime hours below.');
+                    } else {
+                        // No OT - display results directly
+                        outputFileName = data.outputFile;
+                        displayResults(data);
+                        showAlert('success', 'Job costing processed successfully!');
+                    }
+                } else {
+                    showAlert('error', data.error || 'An error occurred during processing');
+                }
+            } catch (error) {
+                showAlert('error', 'Network error: ' + error.message);
+            } finally {
+                processBtn.disabled = false;
+                loading.classList.remove('active');
+            }
+        });
+
+        // OT Submit button
+        document.getElementById('otSubmitBtn').addEventListener('click', async function() {
+            const loading = document.getElementById('loading');
+            const otSelection = document.getElementById('otSelection');
+            const otSubmitBtn = document.getElementById('otSubmitBtn');
+
+            // Collect OT allocations from input fields
+            const otAllocations = {};
+            const inputs = document.querySelectorAll('.ot-hours-input');
+
+            inputs.forEach(input => {
+                const otHours = parseFloat(input.value) || 0;
+                if (otHours > 0) {
+                    const key = input.dataset.key;
+                    const jobIndex = parseInt(input.dataset.jobIndex);
+
+                    if (!otAllocations[key]) {
+                        otAllocations[key] = {};
+                    }
+                    otAllocations[key][jobIndex] = otHours;
+                }
+            });
+
+            // Validate that all OT has been allocated
+            const totalAllocatedByEmployee = {};
+            for (const key in otAllocations) {
+                totalAllocatedByEmployee[key] = Object.values(otAllocations[key]).reduce((sum, val) => sum + val, 0);
+            }
+
+            // Show loading
+            otSubmitBtn.disabled = true;
+            loading.classList.add('active');
+            otSelection.classList.remove('active');
+
+            try {
+                const response = await fetch('/process_with_ot_selections', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        session_id: currentSessionId,
+                        ot_allocations: otAllocations
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    outputFileName = data.outputFile;
+                    displayResults(data);
+                    showAlert('success', 'Job costing processed successfully with OT allocations!');
+                } else {
+                    showAlert('error', data.error || 'An error occurred during processing');
+                    otSelection.classList.add('active');
+                }
+            } catch (error) {
+                showAlert('error', 'Network error: ' + error.message);
+                otSelection.classList.add('active');
+            } finally {
+                otSubmitBtn.disabled = false;
+                loading.classList.remove('active');
+            }
+        });
+
+        // Download button
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            if (outputFileName) {
+                window.location.href = '/download/' + outputFileName;
+            }
+        });
+
+        function showAlert(type, message) {
+            const alertId = type === 'success' ? 'successAlert' : 'errorAlert';
+            const alert = document.getElementById(alertId);
+            alert.textContent = message;
+            alert.classList.add('active');
+
+            setTimeout(() => {
+                alert.classList.remove('active');
+            }, 5000);
+        }
+
+        function displayOTSelection(otData) {
+            const otEmployees = document.getElementById('otEmployees');
+            otEmployees.innerHTML = '';
+
+            if (!otData.has_overtime || !otData.ot_situations || otData.ot_situations.length === 0) {
+                return;
+            }
+
+            otData.ot_situations.forEach(situation => {
+                const employeeDiv = document.createElement('div');
+                employeeDiv.className = 'ot-employee-section';
+
+                const header = document.createElement('div');
+                header.className = 'ot-employee-header';
+                header.textContent = `${situation.employee} - Week ${situation.week} (${situation.total_ot_hours.toFixed(2)} OT hours to allocate)`;
+                employeeDiv.appendChild(header);
+
+                const jobsGrid = document.createElement('div');
+                jobsGrid.className = 'ot-jobs-grid';
+
+                situation.jobs.forEach(job => {
+                    const jobDiv = document.createElement('div');
+                    jobDiv.className = 'ot-job-item';
+
+                    const jobInfo = document.createElement('div');
+                    jobInfo.className = 'ot-job-info';
+                    jobInfo.innerHTML = `
+                        <strong>${job.date}</strong><br>
+                        ${job.customer}<br>
+                        Total: ${job.hours.toFixed(2)} hrs
+                    `;
+                    jobDiv.appendChild(jobInfo);
+
+                    const inputGroup = document.createElement('div');
+                    inputGroup.className = 'ot-input-group';
+
+                    const label = document.createElement('label');
+                    label.textContent = 'OT hrs:';
+                    inputGroup.appendChild(label);
+
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.step = '0.01';
+                    input.min = '0';
+                    input.max = situation.total_ot_hours.toFixed(2);
+                    input.value = '0';
+                    input.className = 'ot-hours-input';
+                    input.dataset.key = `${situation.employee}_${situation.week}`;
+                    input.dataset.jobIndex = job.index;
+                    inputGroup.appendChild(input);
+
+                    jobDiv.appendChild(inputGroup);
+                    jobsGrid.appendChild(jobDiv);
+                });
+
+                employeeDiv.appendChild(jobsGrid);
+
+                const warningDiv = document.createElement('div');
+                warningDiv.className = 'ot-warning';
+                warningDiv.textContent = `Total OT: ${situation.total_ot_hours.toFixed(2)} hrs - Distribute across jobs above`;
+                employeeDiv.appendChild(warningDiv);
+
+                otEmployees.appendChild(employeeDiv);
+            });
+
+            document.getElementById('otSelection').classList.add('active');
+        }
+
+        function displayResults(data) {
+            // Display summary statistics
+            const summaryStats = document.getElementById('summaryStats');
+            summaryStats.innerHTML = '';
+
+            const totalEmployees = data.totals.length;
+            const totalCost = data.totals.reduce((sum, emp) => sum + (emp.Total_Cost || 0), 0);
+            const totalRegHours = data.totals.reduce((sum, emp) => sum + (emp.Regular_Hours || 0), 0);
+            const totalOTHours = data.totals.reduce((sum, emp) => sum + (emp.OT_Hours || 0), 0);
+
+            summaryStats.innerHTML = `
+                <div class="stat">
+                    <div class="stat-label">Employees</div>
+                    <div class="stat-value">${totalEmployees}</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Total Cost</div>
+                    <div class="stat-value">$${totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Regular Hours</div>
+                    <div class="stat-value">${totalRegHours.toFixed(2)}</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">OT Hours</div>
+                    <div class="stat-value">${totalOTHours.toFixed(2)}</div>
+                </div>
+            `;
+
+            // Display employee totals table
+            displayTable('totals', data.totals);
+
+            // Display job costing summary table
+            displayTable('summary', data.summary);
+
+            // Show results section
+            document.getElementById('results').classList.add('active');
+        }
+
+        function displayTable(tableType, data) {
+            if (data.length === 0) return;
+
+            const headId = tableType + 'TableHead';
+            const bodyId = tableType + 'TableBody';
+            const thead = document.getElementById(headId);
+            const tbody = document.getElementById(bodyId);
+
+            // Create header
+            const headers = Object.keys(data[0]);
+            thead.innerHTML = '<tr>' + headers.map(h => `<th>${formatHeader(h)}</th>`).join('') + '</tr>';
+
+            // Create rows
+            tbody.innerHTML = data.map(row => {
+                return '<tr>' + headers.map(h => {
+                    const value = row[h];
+                    return `<td>${formatValue(h, value)}</td>`;
+                }).join('') + '</tr>';
+            }).join('');
+        }
+
+        function formatHeader(header) {
+            return header.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+
+        function formatValue(header, value) {
+            if (value === null || value === undefined) return '';
+
+            // Format currency fields
+            if (header.includes('Cost') || header.includes('Amount')) {
+                return '$' + parseFloat(value).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            }
+
+            // Format numeric fields
+            if (header.includes('Hours') || header.includes('Rate')) {
+                return parseFloat(value).toFixed(2);
+            }
+
+            return value;
+        }
+    </script>
+</body>
+</html>
