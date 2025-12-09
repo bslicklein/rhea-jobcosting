@@ -130,12 +130,20 @@ This was implemented to fix an index mismatch bug where dataframe indices change
 
 ## Employee Totals Display
 
-**Column order** (explicit in `TOTALS_COLUMN_ORDER` constant, `index.html:1926`):
-`Employee_Name → Regular_Hours → OT_Hours → Total_Hours → Base_Rate → Adjusted_Rate → OT_Rate → Total_Cost`
+**Column order** (explicit in `TOTALS_COLUMN_ORDER` constant, `index.html:1927`):
+`Employee_Name → Regular_Hours → OT_Hours → Total_Hours → Payrolled_Hours → Base_Rate → Adjusted_Rate → OT_Rate → Total_Cost`
+
+**Hours columns explained**:
+- `Total_Hours`: Actual hours worked (for project tracking)
+- `Payrolled_Hours`: Hours that should match Paychex payroll
+  - Hourly employees: Same as Total_Hours (they get paid for all hours including OT)
+  - Salaried employees: Capped at 80 (they don't get OT pay - fixed salary)
 
 **Conditional columns** (backend returns `"-"` string, not null):
 - `Adjusted_Rate`: Shows value only for salaried employees with >80 hours
 - `OT_Rate`: Shows value only for hourly employees with OT hours
+
+**Hours Invariant**: `Regular_Hours + OT_Hours = Total_Hours` (enforced at line 723 of `job_costing_converter.py`)
 
 ## Known Limitations
 
@@ -151,3 +159,5 @@ This was implemented to fix an index mismatch bug where dataframe indices change
 4. **New modules**: `paychex_parser.py` and `reconciliation.py` for Paychex validation
 5. **Fixed Employee Totals display**: Explicit column ordering (Employee_Name first), fixed $NaN display for conditional rate columns
 6. **Penny-perfect precision for salaried employees**: Added `calculate_precise_salaried_amounts()` function using Python's `Decimal` module to eliminate rounding errors. Job entry amounts for salaried employees with >80 hours now sum EXACTLY to `base_rate × 80`. Works with or without Paychex file - eliminates need for manual "plug" adjustments in QuickBooks.
+7. **Fixed OT hours double-counting**: Added invariant enforcement (`Regular_Hours = Hours_Decimal - OT_Hours`) to ensure OT hours are properly subtracted from regular hours. Previously, Excel output showed inflated totals because OT rows were added without reducing regular hours.
+8. **Added Payrolled Hours metric**: New column showing hours that should match Paychex payroll (salaried employees capped at 80). Grand totals now show both "Actual Hours Worked" and "Payrolled Hours" with explanation of the difference (unpaid salaried OT).

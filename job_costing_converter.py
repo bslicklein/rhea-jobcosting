@@ -634,7 +634,8 @@ def process_paychex_files(week1_file, week2_file, output_file='job_costing_outpu
         print()
         print("   Please add these employees to the roster before processing.")
         # Return the unknown employees so the UI can prompt the user
-        return None, None, validation['unknown']
+        # Return 4 values to match normal return signature
+        return None, None, validation['unknown'], None
 
     # Calculate weekly hours by employee to determine overtime
     weekly_hours = df_work.groupby(['Employee_Name', 'Week'])['Hours_Decimal'].sum().reset_index()
@@ -714,19 +715,45 @@ def process_paychex_files(week1_file, week2_file, output_file='job_costing_outpu
         df_work['Regular_Hours'] = result[0]
         df_work['OT_Hours'] = result[1]
 
-    # Validation logging: Show OT allocation summary
+    # CRITICAL FIX: Enforce the invariant that Regular_Hours + OT_Hours == Hours_Decimal
+    # OT hours are a SUBSET of total hours worked, not additional hours.
+    # When OT is allocated to a job, it splits Hours_Decimal into:
+    #   - Regular_Hours: paid at normal rate
+    #   - OT_Hours: paid at 1.5x rate (for hourly employees)
+    # The Excel output creates separate rows for each, so they must sum to actual hours.
+    df_work['Regular_Hours'] = df_work['Hours_Decimal'] - df_work['OT_Hours']
+
+    # Validation logging: Show OT allocation summary and verify invariant
     ot_summary = df_work.groupby('Employee_Name').agg({
         'OT_Hours': 'sum',
         'Regular_Hours': 'sum',
         'Hours_Decimal': 'sum'
     }).reset_index()
 
+    # Verify invariant: Regular_Hours + OT_Hours == Hours_Decimal for all employees
+    total_hours_decimal = ot_summary['Hours_Decimal'].sum()
+    total_regular = ot_summary['Regular_Hours'].sum()
+    total_ot = ot_summary['OT_Hours'].sum()
+
+    print(f"\n[DEBUG] Hours Verification (Regular + OT should equal Total):")
+    print(f"  Total Hours (from source): {total_hours_decimal:.2f}")
+    print(f"  Regular Hours: {total_regular:.2f}")
+    print(f"  OT Hours: {total_ot:.2f}")
+    print(f"  Sum (Regular + OT): {total_regular + total_ot:.2f}")
+
+    if abs(total_hours_decimal - (total_regular + total_ot)) > 0.01:
+        print(f"  ⚠️  MISMATCH: Difference of {total_hours_decimal - (total_regular + total_ot):.2f} hours!")
+    else:
+        print(f"  ✓ Verified: Hours balance correctly")
+
     employees_with_ot = ot_summary[ot_summary['OT_Hours'] > 0]
     if len(employees_with_ot) > 0:
-        print("\n[DEBUG] OT Allocation Summary:")
+        print("\n[DEBUG] OT Allocation by Employee:")
         for _, row in employees_with_ot.iterrows():
-            print(f"  ✓ {row['Employee_Name']}: {row['OT_Hours']:.2f} OT hrs, "
-                  f"{row['Regular_Hours']:.2f} reg hrs (total: {row['Hours_Decimal']:.2f} hrs)")
+            reg_plus_ot = row['Regular_Hours'] + row['OT_Hours']
+            status = "✓" if abs(row['Hours_Decimal'] - reg_plus_ot) < 0.01 else "⚠️"
+            print(f"  {status} {row['Employee_Name']}: {row['Regular_Hours']:.2f} reg + "
+                  f"{row['OT_Hours']:.2f} OT = {reg_plus_ot:.2f} (actual: {row['Hours_Decimal']:.2f})")
     else:
         print("\n[DEBUG] No OT hours allocated to any employee")
 
@@ -788,9 +815,18 @@ def process_paychex_files(week1_file, week2_file, output_file='job_costing_outpu
 
         is_salaried = is_employee_salaried(emp_name)
 
+        # Calculate Payrolled Hours: what should match Paychex
+        # - Salaried employees: capped at 80 (they don't get paid for hours over 80)
+        # - Hourly employees: all hours (regular + OT, since OT is paid at 1.5x)
+        if is_salaried:
+            payrolled_hours = min(total_hours, 80.0)
+        else:
+            payrolled_hours = total_hours  # Hourly employees get paid for all hours
+
         employee_totals_list.append({
             'Employee_Name': emp_name,
             'Total_Hours': round(total_hours, 2),
+            'Payrolled_Hours': round(payrolled_hours, 2),
             'Regular_Hours': round(regular_hours, 2),
             'OT_Hours': round(ot_hours, 2),
             'Base_Rate': round(base_rate, 2) if base_rate else 0,
@@ -807,13 +843,31 @@ def process_paychex_files(week1_file, week2_file, output_file='job_costing_outpu
     print("-" * 70)
     for _, emp in employee_totals.iterrows():
         print(f"\n{emp['Employee_Name']}:")
-        print(f"  Total Hours: {emp['Total_Hours']:.2f} (Reg: {emp['Regular_Hours']:.2f}, OT: {emp['OT_Hours']:.2f})")
+        hours_note = ""
+        if emp['Total_Hours'] != emp['Payrolled_Hours']:
+            hours_note = f" → Payrolled: {emp['Payrolled_Hours']:.2f}"
+        print(f"  Actual Hours: {emp['Total_Hours']:.2f} (Reg: {emp['Regular_Hours']:.2f}, OT: {emp['OT_Hours']:.2f}){hours_note}")
         print(f"  Base Rate: ${emp['Base_Rate']:.2f}")
         if emp['Adjusted_Rate'] != "-":
             print(f"  Adjusted Rate: ${emp['Adjusted_Rate']:.2f} (salaried)")
         if emp['OT_Rate'] != "-":
             print(f"  OT Rate: ${emp['OT_Rate']:.2f}")
         print(f"  Total Cost: ${emp['Total_Cost']:,.2f}")
+
+    # Grand totals for reconciliation
+    grand_actual_hours = employee_totals['Total_Hours'].sum()
+    grand_payrolled_hours = employee_totals['Payrolled_Hours'].sum()
+    grand_cost = employee_totals['Total_Cost'].sum()
+
+    print("\n" + "=" * 70)
+    print("📋 GRAND TOTALS (for Paychex reconciliation)")
+    print("=" * 70)
+    print(f"  Actual Hours Worked:  {grand_actual_hours:,.2f}")
+    print(f"  Payrolled Hours:      {grand_payrolled_hours:,.2f}  ← Should match Paychex")
+    if grand_actual_hours != grand_payrolled_hours:
+        diff = grand_actual_hours - grand_payrolled_hours
+        print(f"  Difference:           {diff:,.2f} (salaried employees worked {diff:.2f} unpaid OT hours)")
+    print(f"  Total Cost:           ${grand_cost:,.2f}")
     print()
     
     # Handle Paychex validation if file provided
@@ -918,7 +972,7 @@ if __name__ == "__main__":
         output_file = "job_costing_output.xlsx"
     
     # Process the files
-    summary, totals, unknown_employees = process_paychex_files(week1_file, week2_file, output_file)
+    summary, totals, unknown_employees, _ = process_paychex_files(week1_file, week2_file, output_file)
 
     if unknown_employees:
         print(f"\n⚠️  Cannot process: {len(unknown_employees)} unknown employees need to be added to roster first.")

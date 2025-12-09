@@ -1,5 +1,5 @@
 {
-  "last_updated": "2025-12-08T19:27:44.567255",
+  "last_updated": "2025-12-09T12:04:06.782242",
   "employees": [
     {
       "name": "Alyssa R Monaghan",
@@ -155,6 +155,20 @@
       "base_rate": 55.04,
       "qb_indirect_code": "Y - Indirect Employee Labor:TRS",
       "qb_direct_code": "Y - Direct Employee Labor:Engineer IV"
+    },
+    {
+      "name": "William Johnson",
+      "employee_type": "hourly",
+      "base_rate": 51.5,
+      "qb_indirect_code": "Y - Indirect Employee Labor:WJJ",
+      "qb_direct_code": "Y - Direct Employee Labor:Scientist IV"
+    },
+    {
+      "name": "Zoran Milojkovic",
+      "employee_type": "hourly",
+      "base_rate": 60.0,
+      "qb_indirect_code": "Y - Indirect Employee Labor:ZM",
+      "qb_direct_code": "Y - Direct Employee Labor:Chief of Surveys"
     }
   ]
 }

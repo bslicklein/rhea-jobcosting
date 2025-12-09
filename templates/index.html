@@ -1923,11 +1923,13 @@
         }
 
         // Explicit column order for Employee Totals table (Employee Name first, then hours, rates, and total cost)
+        // Payrolled_Hours = hours that should match Paychex (salaried capped at 80)
         const TOTALS_COLUMN_ORDER = [
             'Employee_Name',
             'Regular_Hours',
             'OT_Hours',
             'Total_Hours',
+            'Payrolled_Hours',
             'Base_Rate',
             'Adjusted_Rate',
             'OT_Rate',

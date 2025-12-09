@@ -1,0 +1,56 @@
+# ============================================
+# Rhea Job Costing - .gitignore
+# ============================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv/
+
+# Excel files (generated outputs, test data)
+*.xlsx
+*.xls
+
+# Example/test data directory
+Example Data/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Excel temporary files
+~$*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment variables (if added later)
+.env
+.env.local
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Uploaded files (Flask)
+uploads/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
