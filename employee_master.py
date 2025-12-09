@@ -176,8 +176,9 @@ def calculate_adjusted_rate(base_rate: float, total_hours: float, standard_hours
         return base_rate
 
     # Adjusted rate = (base_rate × 80) / actual_hours
+    # Use 4 decimal precision to match target output format (e.g., 62.7836)
     adjusted_rate = (base_rate * standard_hours) / total_hours
-    return round(adjusted_rate, 2)
+    return round(adjusted_rate, 4)
 
 
 def get_employee_rate(employee_name: str, total_hours: float = 80.0) -> tuple:

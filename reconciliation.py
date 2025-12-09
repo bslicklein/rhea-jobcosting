@@ -280,7 +280,7 @@ def get_reconciliation_summary(report: ReconciliationReport) -> dict:
                 'difference': round(r.wages_difference, 2),
                 'status': r.status,
                 'status_display': format_status_emoji(r.status),
-                'hours_match': r.hours_match,
+                'hours_match': bool(r.hours_match),
                 'calculated_hours': round(r.calculated_total_hours, 2),
                 'paychex_hours': round(r.paychex_total_hours, 2),
                 'rate_note': format_rate_note(r.base_rate, r.adjusted_rate, r.calculated_total_hours)
