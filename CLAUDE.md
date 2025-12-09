@@ -129,10 +129,12 @@ This was implemented to fix an index mismatch bug where dataframe indices change
 
 ## Employee Totals Display
 
-The UI shows transparent rate information:
-- **Base Rate**: Original hourly rate from employee roster
-- **Adjusted Rate**: For salaried employees working >80 hours (shows "-" if not applicable)
-- **OT Rate**: For hourly employees with overtime (shows "-" if not applicable)
+**Column order** (explicit in `TOTALS_COLUMN_ORDER` constant, `index.html:1926`):
+`Employee_Name → Regular_Hours → OT_Hours → Total_Hours → Base_Rate → Adjusted_Rate → OT_Rate → Total_Cost`
+
+**Conditional columns** (backend returns `"-"` string, not null):
+- `Adjusted_Rate`: Shows value only for salaried employees with >80 hours
+- `OT_Rate`: Shows value only for hourly employees with OT hours
 
 ## Known Limitations
 
@@ -146,3 +148,4 @@ The UI shows transparent rate information:
 2. **Added job_key system**: Stable content-based identifiers for job matching
 3. **UI improvements**: Fixed white text on tables, show all summary rows, added rate columns
 4. **New modules**: `paychex_parser.py` and `reconciliation.py` for Paychex validation
+5. **Fixed Employee Totals display**: Explicit column ordering (Employee_Name first), fixed $NaN display for conditional rate columns

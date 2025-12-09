@@ -1847,8 +1847,8 @@
                 document.getElementById('reconciliationResults').style.display = 'none';
             }
 
-            // Display employee totals table
-            displayTable('totals', data.totals);
+            // Display employee totals table (with explicit column order)
+            displayTable('totals', data.totals, TOTALS_COLUMN_ORDER);
 
             // Display job costing summary table
             displayTable('summary', data.summary);
@@ -1922,7 +1922,19 @@
             reconcSection.style.display = 'block';
         }
 
-        function displayTable(tableType, data) {
+        // Explicit column order for Employee Totals table (Employee Name first, then hours, rates, and total cost)
+        const TOTALS_COLUMN_ORDER = [
+            'Employee_Name',
+            'Regular_Hours',
+            'OT_Hours',
+            'Total_Hours',
+            'Base_Rate',
+            'Adjusted_Rate',
+            'OT_Rate',
+            'Total_Cost'
+        ];
+
+        function displayTable(tableType, data, columnOrder = null) {
             if (data.length === 0) return;
 
             const headId = tableType + 'TableHead';
@@ -1930,8 +1942,8 @@
             const thead = document.getElementById(headId);
             const tbody = document.getElementById(bodyId);
 
-            // Create header
-            const headers = Object.keys(data[0]);
+            // Use explicit column order if provided, otherwise use keys from data
+            const headers = columnOrder || Object.keys(data[0]);
             thead.innerHTML = '<tr>' + headers.map(h => `<th>${formatHeader(h)}</th>`).join('') + '</tr>';
 
             // Create rows
@@ -1958,6 +1970,8 @@
 
             // Format rate fields with $ prefix
             if (header.includes('Rate')) {
+                // Handle "-" string for non-applicable rates (Adjusted_Rate for hourly, OT_Rate for salaried)
+                if (value === '-') return '-';
                 return '$' + parseFloat(value).toFixed(2);
             }
 
