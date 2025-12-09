@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mockup 3: Step-by-Step Wizard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        .header {
+            margin-bottom: 30px;
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 0.95em;
+        }
+
+        .progress-bar {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .progress-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .progress-step::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            width: 100%;
+            height: 3px;
+            background: #e0e0e0;
+            z-index: -1;
+        }
+
+        .progress-step:first-child::before {
+            display: none;
+        }
+
+        .progress-step.completed::before {
+            background: #28a745;
+        }
+
+        .progress-step.active::before {
+            background: linear-gradient(to right, #28a745 0%, #e0e0e0 50%);
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin: 0 auto 8px;
+            transition: all 0.3s;
+        }
+
+        .progress-step.completed .step-circle {
+            background: #28a745;
+            color: white;
+        }
+
+        .progress-step.active .step-circle {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .step-label {
+            font-size: 0.85em;
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .progress-step.active .step-label {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .employee-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .employee-card h2 {
+            font-size: 1.5em;
+            margin-bottom: 8px;
+        }
+
+        .employee-card .ot-badge {
+            background: rgba(255,255,255,0.25);
+            padding: 8px 18px;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .jobs-section {
+            margin-bottom: 30px;
+        }
+
+        .jobs-section h3 {
+            color: #2c3e50;
+            margin-bottom: 16px;
+            font-size: 1.1em;
+        }
+
+        .job-item {
+            display: grid;
+            grid-template-columns: 100px 1fr 90px 120px;
+            gap: 16px;
+            align-items: center;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 4px solid #667eea;
+            transition: all 0.2s;
+        }
+
+        .job-item:hover {
+            background: #e9ecef;
+            transform: translateX(4px);
+        }
+
+        .job-date {
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.9em;
+        }
+
+        .job-description {
+            color: #6c757d;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        .job-hours {
+            text-align: right;
+            color: #495057;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        .ot-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ot-input {
+            width: 80px;
+            padding: 8px 10px;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            font-size: 0.95em;
+            text-align: right;
+            transition: all 0.2s;
+        }
+
+        .ot-input:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .hours-label {
+            color: #6c757d;
+            font-size: 0.85em;
+        }
+
+        .summary-box {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+            margin-bottom: 20px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 12px;
+            background: white;
+            border-radius: 6px;
+        }
+
+        .summary-label {
+            color: #6c757d;
+            font-size: 0.85em;
+            margin-bottom: 6px;
+        }
+
+        .summary-value {
+            font-weight: 700;
+            font-size: 1.3em;
+        }
+
+        .total-ot {
+            color: #dc3545;
+        }
+
+        .allocated-ot {
+            color: #28a745;
+        }
+
+        .remaining-ot {
+            color: #ffc107;
+        }
+
+        .validation-message {
+            padding: 14px 18px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .validation-message.error {
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+            color: #721c24;
+            display: block;
+        }
+
+        .validation-message.success {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            color: #155724;
+            display: block;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            font-size: 1em;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Overtime Allocation</h1>
+            <p>Allocate overtime hours step by step for each employee</p>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-step completed">
+                <div class="step-circle">✓</div>
+                <div class="step-label">Employee 1</div>
+            </div>
+            <div class="progress-step active">
+                <div class="step-circle">2</div>
+                <div class="step-label">Employee 2</div>
+            </div>
+            <div class="progress-step">
+                <div class="step-circle">3</div>
+                <div class="step-label">Review</div>
+            </div>
+        </div>
+
+        <!-- Employee 2: Lynn M Tomlinson (Currently Active) -->
+        <div class="employee-card">
+            <h2>Lynn M Tomlinson</h2>
+            <div>Week 2</div>
+            <div class="ot-badge">7.50 OT hours to allocate</div>
+        </div>
+
+        <div class="jobs-section">
+            <h3>Allocate overtime hours across jobs:</h3>
+            <div class="job-item">
+                <div class="job-date">09/22/2025</div>
+                <div class="job-description">Rhea:801 Operations Indirect Labor:80107 Communication System Mgmt.</div>
+                <div class="job-hours">1.50 hrs</div>
+                <div class="ot-input-group">
+                    <input type="number" class="ot-input" step="0.01" min="0" max="7.50" value="0" data-employee="Lynn M Tomlinson" data-week="2">
+                    <span class="hours-label">hrs</span>
+                </div>
+            </div>
+            <div class="job-item">
+                <div class="job-date">09/22/2025</div>
+                <div class="job-description">Rhea:801 Operations Indirect Labor:80109 Vehicle/Field Equipment Management</div>
+                <div class="job-hours">0.50 hrs</div>
+                <div class="ot-input-group">
+                    <input type="number" class="ot-input" step="0.01" min="0" max="7.50" value="0" data-employee="Lynn M Tomlinson" data-week="2">
+                    <span class="hours-label">hrs</span>
+                </div>
+            </div>
+            <div class="job-item">
+                <div class="job-date">09/22/2025</div>
+                <div class="job-description">Jacobs:2102 - ACAA Support 18-19:210201 - Support Work</div>
+                <div class="job-hours">1.00 hrs</div>
+                <div class="ot-input-group">
+                    <input type="number" class="ot-input" step="0.01" min="0" max="7.50" value="0" data-employee="Lynn M Tomlinson" data-week="2">
+                    <span class="hours-label">hrs</span>
+                </div>
+            </div>
+            <div class="job-item">
+                <div class="job-date">09/22/2025</div>
+                <div class="job-description">Rhea:802 G&A Indirect Labor:80204 Accounting/Tax Mgmt.</div>
+                <div class="job-hours">2.00 hrs</div>
+                <div class="ot-input-group">
+                    <input type="number" class="ot-input" step="0.01" min="0" max="7.50" value="0" data-employee="Lynn M Tomlinson" data-week="2">
+                    <span class="hours-label">hrs</span>
+                </div>
+            </div>
+            <div class="job-item">
+                <div class="job-date">09/22/2025</div>
+                <div class="job-description">Rhea:801 Operations Indirect Labor:80108 Office Management</div>
+                <div class="job-hours">1.50 hrs</div>
+                <div class="ot-input-group">
+                    <input type="number" class="ot-input" step="0.01" min="0" max="7.50" value="0" data-employee="Lynn M Tomlinson" data-week="2">
+                    <span class="hours-label">hrs</span>
+                </div>
+            </div>
+            <div class="job-item">
+                <div class="job-date">09/22/2025</div>
+                <div class="job-description">Desmone:2612 - Bens Market:261200 - Proposal</div>
+                <div class="job-hours">1.00 hrs</div>
+                <div class="ot-input-group">
+                    <input type="number" class="ot-input" step="0.01" min="0" max="7.50" value="0" data-employee="Lynn M Tomlinson" data-week="2">
+                    <span class="hours-label">hrs</span>
+                </div>
+            </div>
+            <div class="job-item">
+                <div class="job-date">09/22/2025</div>
+                <div class="job-description">Rhea:801 Operations Indirect Labor:80136 - BD-Others</div>
+                <div class="job-hours">1.50 hrs</div>
+                <div class="ot-input-group">
+                    <input type="number" class="ot-input" step="0.01" min="0" max="7.50" value="0" data-employee="Lynn M Tomlinson" data-week="2">
+                    <span class="hours-label">hrs</span>
+                </div>
+            </div>
+            <div class="job-item">
+                <div class="job-date">09/22/2025</div>
+                <div class="job-description">Rhea:801 Operations Indirect Labor:80110 Office Mtg Prep/Participation</div>
+                <div class="job-hours">1.00 hrs</div>
+                <div class="ot-input-group">
+                    <input type="number" class="ot-input" step="0.01" min="0" max="7.50" value="0" data-employee="Lynn M Tomlinson" data-week="2">
+                    <span class="hours-label">hrs</span>
+                </div>
+            </div>
+            <div class="job-item">
+                <div class="job-date">09/22/2025</div>
+                <div class="job-description">NAVFAC MIDLANT:RAOMAC 0109:2573 - SJCA Sites 2,4 LTM & Veg Maint.:257310 - Deliverables</div>
+                <div class="job-hours">1.50 hrs</div>
+                <div class="ot-input-group">
+                    <input type="number" class="ot-input" step="0.01" min="0" max="7.50" value="0" data-employee="Lynn M Tomlinson" data-week="2">
+                    <span class="hours-label">hrs</span>
+                </div>
+            </div>
+            <div class="job-item">
+                <div class="job-date">09/23/2025</div>
+                <div class="job-description">Rhea:802 G&A Indirect Labor:80204 Accounting/Tax Mgmt.</div>
+                <div class="job-hours">4.50 hrs</div>
+                <div class="ot-input-group">
+                    <input type="number" class="ot-input" step="0.01" min="0" max="7.50" value="0" data-employee="Lynn M Tomlinson" data-week="2">
+                    <span class="hours-label">hrs</span>
+                </div>
+            </div>
+            <div class="job-item">
+                <div class="job-date">09/23/2025</div>
+                <div class="job-description">Rhea:801 Operations Indirect Labor:80109 Vehicle/Field Equipment Management</div>
+                <div class="job-hours">0.50 hrs</div>
+                <div class="ot-input-group">
+                    <input type="number" class="ot-input" step="0.01" min="0" max="7.50" value="0" data-employee="Lynn M Tomlinson" data-week="2">
+                    <span class="hours-label">hrs</span>
+                </div>
+            </div>
+            <div class="job-item">
+                <div class="job-date">09/23/2025</div>
+                <div class="job-description">Rhea:802 G&A Indirect Labor:80201 Human Resources Mgmt.</div>
+                <div class="job-hours">1.00 hrs</div>
+                <div class="ot-input-group">
+                    <input type="number" class="ot-input" step="0.01" min="0" max="7.50" value="0" data-employee="Lynn M Tomlinson" data-week="2">
+                    <span class="hours-label">hrs</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-box">
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-label">Total Hours</div>
+                    <div class="summary-value">47.50 hrs</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Required OT</div>
+                    <div class="summary-value total-ot">7.50 hrs</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Allocated OT</div>
+                    <div class="summary-value allocated-ot" id="allocated">0.00 hrs</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Remaining</div>
+                    <div class="summary-value remaining-ot" id="remaining">7.50 hrs</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="validation-message error" id="validation">
+            ⚠ Please allocate all 7.50 overtime hours before continuing
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-secondary" id="prevBtn">← Previous Employee</button>
+            <button class="btn btn-primary" id="nextBtn" disabled>Next Employee →</button>
+        </div>
+    </div>
+
+    <script>
+        // Calculation logic
+        document.querySelectorAll('.ot-input').forEach(input => {
+            input.addEventListener('input', function() {
+                const employee = this.dataset.employee;
+                const week = this.dataset.week;
+                
+                const inputs = document.querySelectorAll(`.ot-input[data-employee="${employee}"][data-week="${week}"]`);
+                let total = 0;
+                inputs.forEach(inp => {
+                    total += parseFloat(inp.value) || 0;
+                });
+                
+                document.getElementById('allocated').textContent = total.toFixed(2) + ' hrs';
+                document.getElementById('remaining').textContent = Math.max(0, 7.50 - total).toFixed(2) + ' hrs';
+                
+                const validation = document.getElementById('validation');
+                const nextBtn = document.getElementById('nextBtn');
+                
+                if (Math.abs(total - 7.50) < 0.01) {
+                    validation.className = 'validation-message success';
+                    validation.textContent = '✓ All overtime hours allocated correctly. You can proceed to the next employee.';
+                    nextBtn.disabled = false;
+                } else {
+                    validation.className = 'validation-message error';
+                    validation.textContent = `⚠ Please allocate all 7.50 overtime hours (${total.toFixed(2)} allocated, ${(7.50 - total).toFixed(2)} remaining)`;
+                    nextBtn.disabled = true;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+

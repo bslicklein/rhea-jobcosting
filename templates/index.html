@@ -338,10 +338,10 @@
         .ot-selection {
             display: none;
             margin-top: 15px;
-            padding: 15px;
-            background: #fff3cd;
-            border: 2px solid #ffc107;
+            padding: 20px;
+            background: white;
             border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .ot-selection.active {
@@ -349,89 +349,424 @@
         }
 
         .ot-selection h3 {
-            color: #856404;
+            color: #333;
             margin-bottom: 10px;
-            font-size: 1.1em;
+            font-size: 1.3em;
         }
 
         .ot-selection > p {
-            margin-bottom: 12px;
-            font-size: 0.9em;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+            color: #666;
+        }
+
+        .alert-banner {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 16px 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert-banner::before {
+            content: "⚠️";
+            font-size: 1.5em;
+        }
+
+        .alert-banner p {
+            margin: 0;
+            color: #856404;
+            font-weight: 500;
         }
 
         .ot-employee-section {
-            background: white;
-            padding: 12px;
-            margin-bottom: 12px;
-            border-radius: 6px;
-            border: 1px solid #e0e0e0;
+            margin-bottom: 40px;
         }
 
         .ot-employee-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ot-employee-header h2 {
+            font-size: 1.2em;
             font-weight: 600;
-            font-size: 1em;
-            color: #333;
-            margin-bottom: 10px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #667eea;
+            margin: 0;
         }
 
-        .ot-jobs-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 10px;
+        .ot-employee-header .ot-badge {
+            background: rgba(255,255,255,0.25);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.95em;
         }
 
-        .ot-job-item {
-            padding: 10px;
-            background: #f8f9ff;
-            border-radius: 4px;
+        .ot-table-wrapper {
             border: 1px solid #e0e0e0;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            overflow: hidden;
+        }
+
+        .ot-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .ot-table thead {
+            background: #f8f9fa;
+        }
+
+        .ot-table th {
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9em;
+            color: #495057;
+            border-bottom: 2px solid #dee2e6;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            transition: background-color 0.2s;
+        }
+
+        .ot-table th:hover {
+            background: #e9ecef;
+        }
+
+        .ot-table th.sortable::after {
+            content: ' ↕';
+            opacity: 0.5;
+            font-size: 0.9em;
+            margin-left: 4px;
+        }
+
+        .ot-table th.sort-asc::after {
+            content: ' ↑';
+            opacity: 1;
+        }
+
+        .ot-table th.sort-desc::after {
+            content: ' ↓';
+            opacity: 1;
+        }
+
+        .ot-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #e9ecef;
             font-size: 0.9em;
         }
 
-        .ot-job-info {
-            margin-bottom: 8px;
-            color: #333;
+        .ot-table tbody tr:hover {
+            background: #f8f9ff;
         }
 
-        .ot-job-info strong {
-            color: #667eea;
+        .ot-table tbody tr:last-child td {
+            border-bottom: none;
         }
 
-        .ot-input-group {
+        .ot-date-col {
+            width: 120px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .ot-customer-col {
+            min-width: 300px;
+            color: #6c757d;
+            line-height: 1.5;
+        }
+
+        .ot-hours-col {
+            width: 100px;
+            text-align: right;
+            color: #495057;
+        }
+
+        .ot-input-col {
+            width: 150px;
+        }
+
+        .ot-input-wrapper {
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .ot-input-group label {
-            font-weight: 600;
-            color: #333;
-            font-size: 0.9em;
-        }
-
-        .ot-input-group input {
-            padding: 6px 10px;
+        .ot-hours-input {
+            width: 90px;
+            padding: 8px 10px;
             border: 2px solid #667eea;
-            border-radius: 4px;
-            font-size: 0.9em;
-            width: 100px;
+            border-radius: 6px;
+            font-size: 0.95em;
+            text-align: right;
+            transition: all 0.2s;
         }
 
-        .ot-submit-btn {
+        .ot-hours-input:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .ot-hours-input:invalid {
+            border-color: #dc3545;
+        }
+
+        .ot-hours-label {
+            color: #6c757d;
+            font-size: 0.85em;
+        }
+
+        .ot-summary-row {
+            background: #f8f9fa !important;
+            font-weight: 600;
+            border-top: 2px solid #dee2e6;
+        }
+
+        .ot-summary-row td {
+            padding: 16px;
+            color: #2c3e50;
+        }
+
+        .ot-total-display {
+            color: #dc3545;
+            font-size: 1.05em;
+        }
+
+        .ot-allocated-display {
+            color: #28a745;
+        }
+
+        .ot-remaining-display {
+            color: #ffc107;
+            font-weight: 600;
+        }
+
+        .ot-validation-message {
             margin-top: 12px;
-            width: 100%;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            display: none;
         }
 
-        .ot-warning {
+        .ot-validation-message.error {
             background: #f8d7da;
             border: 1px solid #f5c6cb;
             color: #721c24;
+            display: block;
+        }
+
+        .ot-validation-message.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            display: block;
+        }
+
+        .ot-submit-btn {
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .roster-section {
+            margin-bottom: 30px;
+        }
+
+        .roster-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        #rosterTable {
+            font-size: 0.9em;
+        }
+
+        #rosterTable th {
+            background: #667eea;
+            color: white;
+            padding: 10px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+
+        #rosterTable th:hover {
+            background: #5568d3;
+        }
+
+        #rosterTable th.sortable {
+            position: relative;
+            padding-right: 25px;
+        }
+
+        #rosterTable th.sortable::after {
+            content: '↕';
+            position: absolute;
+            right: 8px;
+            opacity: 0.5;
+            font-size: 0.9em;
+        }
+
+        #rosterTable th.sort-asc::after {
+            content: '↑';
+            opacity: 1;
+        }
+
+        #rosterTable th.sort-desc::after {
+            content: '↓';
+            opacity: 1;
+        }
+
+        #rosterTable td {
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        #rosterTable tr:hover {
+            background: #f8f9ff;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-action {
+            padding: 7px 14px;
+            font-size: 0.875em;
+            font-weight: 500;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-action::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.4s, height 0.4s;
+        }
+
+        .btn-action:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-action:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #653a8a 100%);
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, #ee5a6f 0%, #c44569 100%);
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: linear-gradient(135deg, #d94a5f 0%, #b03a59 100%);
+        }
+
+        .btn-action-icon {
+            width: 14px;
+            height: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.95;
+        }
+
+        .btn-action-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content input,
+        .modal-content select {
+            width: 100%;
             padding: 8px;
+            border: 2px solid #667eea;
             border-radius: 4px;
-            margin-top: 8px;
-            font-size: 0.85em;
+            font-size: 0.95em;
+            font-family: inherit;
+        }
+
+        .modal-content label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
         }
     </style>
 </head>
@@ -445,26 +780,70 @@
         </div>
 
         <div class="main-card">
-            <div class="info-box">
-                <h4>Quick Start</h4>
-                <ul>
-                    <li>Export Week 1 and Week 2 payroll data from Paychex</li>
-                    <li>Upload both files, click Process, and download your Excel report</li>
-                </ul>
+            <!-- Employee Roster Management Section -->
+            <div class="roster-section" id="rosterSection">
+                <h2 style="color: #333; margin-bottom: 15px; font-size: 1.3em;">Step 1: Manage Employee Roster</h2>
+                <div class="info-box">
+                    <h4>Employee Roster</h4>
+                    <p style="margin: 0; color: #333;">Manage your employee roster with base salary, hourly/salary type, and QuickBooks codes. This data is used for job costing calculations.</p>
+                </div>
+
+                <div class="roster-controls" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <button class="btn btn-primary" id="addEmployeeBtn" style="padding: 10px 20px;">
+                        + Add Employee
+                    </button>
+                    <button class="btn btn-secondary" id="continueToUploadBtn" style="display: none;">
+                        Continue to File Upload →
+                    </button>
+                </div>
+
+                <div class="table-container" style="max-height: 400px;">
+                    <table id="rosterTable">
+                        <thead>
+                            <tr>
+                                <th>Last Name (Payroll)</th>
+                                <th>Employee Name (QuickBooks)</th>
+                                <th>QB Indirect Code</th>
+                                <th>QB Direct Code</th>
+                                <th>Rate (Hourly)</th>
+                                <th>Hourly or Salary</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rosterTableBody">
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 20px; color: #666;">
+                                    Loading roster...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            <div class="alert alert-success" id="successAlert"></div>
-            <div class="alert alert-error" id="errorAlert"></div>
+            <!-- File Upload Section (initially hidden) -->
+            <div class="upload-section-container" id="uploadSection" style="display: none; margin-top: 30px;">
+                <h2 style="color: #333; margin-bottom: 15px; font-size: 1.3em;">Step 2: Upload QuickBooks Week 1 & Week 2 Files</h2>
+                <div class="info-box">
+                    <h4>Quick Start</h4>
+                    <ul>
+                        <li>Export Week 1 and Week 2 payroll data from QuickBooks</li>
+                        <li>Upload both files, click Process, and download your Excel report</li>
+                    </ul>
+                </div>
 
-            <form id="uploadForm" class="upload-section">
+                <div class="alert alert-success" id="successAlert"></div>
+                <div class="alert alert-error" id="errorAlert"></div>
+
+                <form id="uploadForm" class="upload-section">
                 <div class="file-input-group">
-                    <label for="week1File">Week 1 Paychex File</label>
+                    <label for="week1File">Week 1 QuickBooks File</label>
                     <input type="file" id="week1File" name="week1File" class="file-input" accept=".txt,.csv,.xlsx,.xls" required>
                     <div class="file-name" id="week1FileName"></div>
                 </div>
 
                 <div class="file-input-group">
-                    <label for="week2File">Week 2 Paychex File</label>
+                    <label for="week2File">Week 2 QuickBooks File</label>
                     <input type="file" id="week2File" name="week2File" class="file-input" accept=".txt,.csv,.xlsx,.xls" required>
                     <div class="file-name" id="week2FileName"></div>
                 </div>
@@ -483,16 +862,16 @@
 
             <div class="ot-selection" id="otSelection">
                 <h3>Overtime Detected - Select Job Allocation</h3>
-                <p style="color: #856404; margin-bottom: 20px;">
-                    Overtime hours have been detected for one or more employees. Please allocate the overtime hours to specific jobs below.
-                </p>
+                <div class="alert-banner">
+                    <p>Overtime hours detected. Please distribute the overtime hours across the jobs below.</p>
+                </div>
                 <div id="otEmployees"></div>
                 <button class="btn btn-primary ot-submit-btn" id="otSubmitBtn">
                     Process with Selected OT Allocations
                 </button>
             </div>
 
-            <div class="results" id="results">
+                <div class="results" id="results">
                 <div class="results-header">
                     <h2>Job Costing Results</h2>
                     <button class="btn btn-secondary" id="downloadBtn">
@@ -528,12 +907,449 @@
                     </div>
                 </div>
             </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unknown Employees Modal -->
+    <div class="modal" id="unknownEmployeesModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <h3 style="margin-bottom: 15px; color: #d32f2f;">
+                <span style="margin-right: 8px;">⚠️</span> Unknown Employees Found
+            </h3>
+            <p style="margin-bottom: 20px; color: #666;">
+                The following employees were found in your Paychex files but are not in your employee roster.
+                Please add them before processing.
+            </p>
+            <div id="unknownEmployeesList" style="margin-bottom: 20px; max-height: 300px; overflow-y: auto;">
+                <!-- Unknown employees will be listed here -->
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" class="btn" id="cancelUnknownBtn" style="background: #6c757d; color: white;">
+                    Cancel
+                </button>
+                <button type="button" class="btn btn-primary" id="goToRosterBtn">
+                    Go to Roster & Add Employees
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employee Modal -->
+    <div class="modal" id="employeeModal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 20px; color: #333;" id="modalTitle">Add Employee</h3>
+            <form id="employeeForm">
+                <input type="hidden" id="employeeNameOriginal" value="">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #333;">Employee Name (QuickBooks) *</label>
+                    <input type="text" id="employeeName" required style="width: 100%; padding: 8px; border: 2px solid #667eea; border-radius: 4px; font-size: 0.95em;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #333;">Hourly or Salary *</label>
+                    <select id="employeeType" required style="width: 100%; padding: 8px; border: 2px solid #667eea; border-radius: 4px; font-size: 0.95em;">
+                        <option value="">Select...</option>
+                        <option value="hourly">Hourly</option>
+                        <option value="salaried">Salary</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #333;">Rate (Hourly) *</label>
+                    <input type="number" id="employeeRate" required step="0.01" min="0" style="width: 100%; padding: 8px; border: 2px solid #667eea; border-radius: 4px; font-size: 0.95em;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #333;">QB Indirect Code</label>
+                    <input type="text" id="qbIndirectCode" style="width: 100%; padding: 8px; border: 2px solid #667eea; border-radius: 4px; font-size: 0.95em;">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #333;">QB Direct Code</label>
+                    <input type="text" id="qbDirectCode" style="width: 100%; padding: 8px; border: 2px solid #667eea; border-radius: 4px; font-size: 0.95em;">
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="btn" id="cancelEmployeeBtn" style="background: #6c757d; color: white;">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
         let outputFileName = '';
         let currentSessionId = '';
+        let employees = [];
+        let sortColumn = null;
+        let sortDirection = 'asc';
+
+        // Load roster on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRoster();
+            
+            // Modal handlers
+            document.getElementById('cancelEmployeeBtn').addEventListener('click', closeEmployeeModal);
+            document.getElementById('employeeForm').addEventListener('submit', saveEmployee);
+            document.getElementById('addEmployeeBtn').addEventListener('click', () => openEmployeeModal());
+            document.getElementById('continueToUploadBtn').addEventListener('click', () => {
+                document.getElementById('rosterSection').style.display = 'none';
+                document.getElementById('uploadSection').style.display = 'block';
+            });
+
+            // Unknown employees modal handlers
+            document.getElementById('cancelUnknownBtn').addEventListener('click', closeUnknownEmployeesModal);
+            document.getElementById('goToRosterBtn').addEventListener('click', () => {
+                closeUnknownEmployeesModal();
+                // Show roster section and hide upload section
+                document.getElementById('uploadSection').style.display = 'none';
+                document.getElementById('rosterSection').style.display = 'block';
+            });
+
+            // Close unknown employees modal when clicking outside
+            document.getElementById('unknownEmployeesModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeUnknownEmployeesModal();
+                }
+            });
+
+            // Event delegation for edit/delete buttons
+            document.getElementById('rosterTableBody').addEventListener('click', function(e) {
+                if (e.target.classList.contains('edit-employee-btn')) {
+                    const index = parseInt(e.target.getAttribute('data-employee-index'));
+                    if (employees[index]) {
+                        editEmployee(employees[index].name);
+                    }
+                } else if (e.target.classList.contains('delete-employee-btn')) {
+                    const index = parseInt(e.target.getAttribute('data-employee-index'));
+                    if (employees[index]) {
+                        deleteEmployee(employees[index].name);
+                    }
+                }
+            });
+
+            // Set up sort handlers for table headers (they exist in the HTML)
+            const headers = document.querySelectorAll('#rosterTable th');
+            headers.forEach((th, index) => {
+                if (index < 6) { // All columns except Actions
+                    th.addEventListener('click', () => {
+                        handleSort(getColumnKey(index));
+                    });
+                }
+            });
+        });
+
+        async function loadRoster() {
+            try {
+                const response = await fetch('/api/roster');
+                const data = await response.json();
+                
+                if (data.success) {
+                    employees = data.employees;
+                    displayRoster(employees);
+                    if (employees.length > 0) {
+                        document.getElementById('continueToUploadBtn').style.display = 'block';
+                    }
+                } else {
+                    showAlert('error', 'Failed to load roster: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                showAlert('error', 'Error loading roster: ' + error.message);
+            }
+        }
+
+        function sortEmployees(employeesList, column, direction) {
+            const sorted = [...employeesList];
+            
+            sorted.sort((a, b) => {
+                let aVal, bVal;
+                
+                switch(column) {
+                    case 'lastName':
+                        aVal = (a.name.split(' ').pop() || a.name).toLowerCase();
+                        bVal = (b.name.split(' ').pop() || b.name).toLowerCase();
+                        break;
+                    case 'name':
+                        aVal = a.name.toLowerCase();
+                        bVal = b.name.toLowerCase();
+                        break;
+                    case 'qbIndirect':
+                        aVal = (a.qb_indirect_code || '').toLowerCase();
+                        bVal = (b.qb_indirect_code || '').toLowerCase();
+                        break;
+                    case 'qbDirect':
+                        aVal = (a.qb_direct_code || '').toLowerCase();
+                        bVal = (b.qb_direct_code || '').toLowerCase();
+                        break;
+                    case 'rate':
+                        aVal = parseFloat(a.base_rate);
+                        bVal = parseFloat(b.base_rate);
+                        break;
+                    case 'type':
+                        aVal = a.employee_type === 'salaried' ? 'Salary' : 'Hourly';
+                        bVal = b.employee_type === 'salaried' ? 'Salary' : 'Hourly';
+                        break;
+                    default:
+                        return 0;
+                }
+                
+                if (typeof aVal === 'number') {
+                    return direction === 'asc' ? aVal - bVal : bVal - aVal;
+                } else {
+                    if (aVal < bVal) return direction === 'asc' ? -1 : 1;
+                    if (aVal > bVal) return direction === 'asc' ? 1 : -1;
+                    return 0;
+                }
+            });
+            
+            return sorted;
+        }
+
+        function updateSortIndicators() {
+            const headers = document.querySelectorAll('#rosterTable th');
+            headers.forEach((th, index) => {
+                th.classList.remove('sortable', 'sort-asc', 'sort-desc');
+                if (index < 6) { // All columns except Actions
+                    th.classList.add('sortable');
+                    if (sortColumn === getColumnKey(index)) {
+                        th.classList.add(`sort-${sortDirection}`);
+                    }
+                }
+            });
+        }
+
+        function getColumnKey(index) {
+            const columns = ['lastName', 'name', 'qbIndirect', 'qbDirect', 'rate', 'type'];
+            return columns[index];
+        }
+
+        function handleSort(column) {
+            if (sortColumn === column) {
+                // Toggle direction
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                // New column, start with ascending
+                sortColumn = column;
+                sortDirection = 'asc';
+            }
+            
+            updateSortIndicators();
+            displayRoster(employees);
+        }
+
+        function displayRoster(employeesList) {
+            const tbody = document.getElementById('rosterTableBody');
+            
+            if (employeesList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #666;">No employees in roster. Click "Add Employee" to get started.</td></tr>';
+                updateSortIndicators();
+                return;
+            }
+
+            // Sort the list if a sort column is selected
+            let sortedList = employeesList;
+            if (sortColumn) {
+                sortedList = sortEmployees(employeesList, sortColumn, sortDirection);
+            }
+
+            tbody.innerHTML = sortedList.map((emp, index) => {
+                const lastName = emp.name.split(' ').pop() || emp.name;
+                const employeeType = emp.employee_type === 'salaried' ? 'Salary' : 'Hourly';
+                const rate = parseFloat(emp.base_rate).toFixed(2);
+                
+                // Find original index for edit/delete buttons
+                const originalIndex = employees.findIndex(e => e.name === emp.name);
+                
+                return `
+                    <tr>
+                        <td>${lastName}</td>
+                        <td>${emp.name}</td>
+                        <td>${emp.qb_indirect_code || ''}</td>
+                        <td>${emp.qb_direct_code || ''}</td>
+                        <td>$${rate}</td>
+                        <td>${employeeType}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-action btn-edit edit-employee-btn" data-employee-index="${originalIndex}">
+                                    <span class="btn-action-icon">
+                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                        </svg>
+                                    </span>
+                                    <span>Edit</span>
+                                </button>
+                                <button class="btn-action btn-delete delete-employee-btn" data-employee-index="${originalIndex}">
+                                    <span class="btn-action-icon">
+                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                        </svg>
+                                    </span>
+                                    <span>Delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            updateSortIndicators();
+        }
+
+        function openEmployeeModal(employee = null) {
+            const modal = document.getElementById('employeeModal');
+            const form = document.getElementById('employeeForm');
+            const title = document.getElementById('modalTitle');
+            
+            if (employee) {
+                title.textContent = 'Edit Employee';
+                document.getElementById('employeeNameOriginal').value = employee.name;
+                document.getElementById('employeeName').value = employee.name;
+                document.getElementById('employeeType').value = employee.employee_type;
+                document.getElementById('employeeRate').value = employee.base_rate;
+                document.getElementById('qbIndirectCode').value = employee.qb_indirect_code || '';
+                document.getElementById('qbDirectCode').value = employee.qb_direct_code || '';
+            } else {
+                title.textContent = 'Add Employee';
+                form.reset();
+                document.getElementById('employeeNameOriginal').value = '';
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        function closeEmployeeModal() {
+            const modal = document.getElementById('employeeModal');
+            modal.style.display = 'none';
+            document.getElementById('employeeForm').reset();
+        }
+
+        function showUnknownEmployeesModal(unknownEmployees) {
+            const modal = document.getElementById('unknownEmployeesModal');
+            const listDiv = document.getElementById('unknownEmployeesList');
+
+            // Build the list of unknown employees with "Quick Add" buttons
+            listDiv.innerHTML = unknownEmployees.map(empName => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #fff3cd; border-radius: 6px; margin-bottom: 8px; border-left: 4px solid #ffc107;">
+                    <span style="font-weight: 500; color: #856404;">${empName}</span>
+                    <button type="button" class="btn btn-primary quick-add-btn" data-emp-name="${empName}" style="padding: 6px 12px; font-size: 0.85em;">
+                        + Quick Add
+                    </button>
+                </div>
+            `).join('');
+
+            // Add event listeners to quick add buttons
+            listDiv.querySelectorAll('.quick-add-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const empName = this.getAttribute('data-emp-name');
+                    closeUnknownEmployeesModal();
+                    // Pre-fill the employee form with the name
+                    openEmployeeModal({
+                        name: empName,
+                        employee_type: '',
+                        base_rate: '',
+                        qb_indirect_code: '',
+                        qb_direct_code: ''
+                    });
+                });
+            });
+
+            modal.style.display = 'flex';
+        }
+
+        function closeUnknownEmployeesModal() {
+            const modal = document.getElementById('unknownEmployeesModal');
+            modal.style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('employeeModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEmployeeModal();
+            }
+        });
+
+        async function saveEmployee(e) {
+            e.preventDefault();
+            
+            const originalName = document.getElementById('employeeNameOriginal').value;
+            const name = document.getElementById('employeeName').value;
+            const employeeType = document.getElementById('employeeType').value;
+            const rate = parseFloat(document.getElementById('employeeRate').value);
+            const qbIndirect = document.getElementById('qbIndirectCode').value;
+            const qbDirect = document.getElementById('qbDirectCode').value;
+
+            try {
+                let response;
+                if (originalName) {
+                    // Update existing
+                    response = await fetch('/api/roster/update', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            original_name: originalName,
+                            name: name,
+                            employee_type: employeeType,
+                            base_rate: rate,
+                            qb_indirect_code: qbIndirect,
+                            qb_direct_code: qbDirect
+                        })
+                    });
+                } else {
+                    // Add new
+                    response = await fetch('/api/roster', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            name: name,
+                            employee_type: employeeType,
+                            base_rate: rate,
+                            qb_indirect_code: qbIndirect,
+                            qb_direct_code: qbDirect
+                        })
+                    });
+                }
+
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showAlert('success', originalName ? 'Employee updated successfully' : 'Employee added successfully');
+                    closeEmployeeModal();
+                    loadRoster();
+                } else {
+                    showAlert('error', data.error || 'Failed to save employee');
+                }
+            } catch (error) {
+                showAlert('error', 'Error saving employee: ' + error.message);
+            }
+        }
+
+        function editEmployee(name) {
+            const employee = employees.find(e => e.name === name);
+            if (employee) {
+                openEmployeeModal(employee);
+            }
+        }
+
+        async function deleteEmployee(name) {
+            if (!confirm(`Are you sure you want to delete ${name}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/roster/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showAlert('success', 'Employee deleted successfully');
+                    loadRoster();
+                } else {
+                    showAlert('error', data.error || 'Failed to delete employee');
+                }
+            } catch (error) {
+                showAlert('error', 'Error deleting employee: ' + error.message);
+            }
+        }
 
         // File input handlers
         document.getElementById('week1File').addEventListener('change', function(e) {
@@ -588,8 +1404,13 @@
                 const data = await response.json();
 
                 if (response.ok) {
+                    // Check if roster update is required (unknown employees)
+                    if (data.requires_roster_update) {
+                        showUnknownEmployeesModal(data.unknown_employees);
+                        showAlert('error', data.message || 'Some employees are not in the roster.');
+                    }
                     // Check if OT selection is required
-                    if (data.requires_ot_selection) {
+                    else if (data.requires_ot_selection) {
                         currentSessionId = data.session_id;
                         displayOTSelection(data.ot_data);
                         showAlert('success', 'Files uploaded. Please allocate overtime hours below.');
@@ -659,9 +1480,17 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    outputFileName = data.outputFile;
-                    displayResults(data);
-                    showAlert('success', 'Job costing processed successfully with OT allocations!');
+                    // Check if roster update is required (unknown employees)
+                    if (data.requires_roster_update) {
+                        currentSessionId = data.session_id; // Keep session for retry
+                        showUnknownEmployeesModal(data.unknown_employees);
+                        showAlert('error', data.message || 'Some employees are not in the roster.');
+                        otSelection.classList.add('active'); // Keep OT selection visible
+                    } else {
+                        outputFileName = data.outputFile;
+                        displayResults(data);
+                        showAlert('success', 'Job costing processed successfully with OT allocations!');
+                    }
                 } else {
                     showAlert('error', data.error || 'An error occurred during processing');
                     otSelection.classList.add('active');
@@ -701,38 +1530,91 @@
                 return;
             }
 
-            otData.ot_situations.forEach(situation => {
+            otData.ot_situations.forEach((situation, empIndex) => {
                 const employeeDiv = document.createElement('div');
                 employeeDiv.className = 'ot-employee-section';
+                employeeDiv.dataset.employeeKey = `${situation.employee}_${situation.week}`;
 
+                // Header
                 const header = document.createElement('div');
                 header.className = 'ot-employee-header';
-                header.textContent = `${situation.employee} - Week ${situation.week} (${situation.total_ot_hours.toFixed(2)} OT hours to allocate)`;
+                const headerTitle = document.createElement('h2');
+                headerTitle.textContent = `${situation.employee} - Week ${situation.week}`;
+                const badge = document.createElement('div');
+                badge.className = 'ot-badge';
+                badge.textContent = `${situation.total_ot_hours.toFixed(2)} OT hours to allocate`;
+                header.appendChild(headerTitle);
+                header.appendChild(badge);
                 employeeDiv.appendChild(header);
 
-                const jobsGrid = document.createElement('div');
-                jobsGrid.className = 'ot-jobs-grid';
+                // Table wrapper
+                const tableWrapper = document.createElement('div');
+                tableWrapper.className = 'ot-table-wrapper';
+                const table = document.createElement('table');
+                table.className = 'ot-table';
 
+                // Table header
+                const thead = document.createElement('thead');
+                const headerRow = document.createElement('tr');
+                
+                const thDate = document.createElement('th');
+                thDate.className = 'sortable';
+                thDate.textContent = 'Date';
+                thDate.dataset.sort = 'date';
+                thDate.onclick = () => sortTable(employeeDiv, 'date');
+                
+                const thCustomer = document.createElement('th');
+                thCustomer.className = 'sortable';
+                thCustomer.textContent = 'Job Description';
+                thCustomer.dataset.sort = 'customer';
+                thCustomer.onclick = () => sortTable(employeeDiv, 'customer');
+                
+                const thHours = document.createElement('th');
+                thHours.className = 'sortable';
+                thHours.textContent = 'Total Hours';
+                thHours.style.textAlign = 'right';
+                thHours.dataset.sort = 'hours';
+                thHours.onclick = () => sortTable(employeeDiv, 'hours');
+                
+                const thOT = document.createElement('th');
+                thOT.textContent = 'Overtime Hours';
+                thOT.style.width = '150px';
+                
+                headerRow.appendChild(thDate);
+                headerRow.appendChild(thCustomer);
+                headerRow.appendChild(thHours);
+                headerRow.appendChild(thOT);
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+
+                // Table body
+                const tbody = document.createElement('tbody');
+                tbody.className = 'ot-tbody';
+                
                 situation.jobs.forEach(job => {
-                    const jobDiv = document.createElement('div');
-                    jobDiv.className = 'ot-job-item';
+                    const row = document.createElement('tr');
+                    row.dataset.jobIndex = job.index;
+                    row.dataset.date = job.date;
+                    row.dataset.customer = job.customer.toLowerCase();
+                    row.dataset.hours = job.hours;
 
-                    const jobInfo = document.createElement('div');
-                    jobInfo.className = 'ot-job-info';
-                    jobInfo.innerHTML = `
-                        <strong>${job.date}</strong><br>
-                        ${job.customer}<br>
-                        Total: ${job.hours.toFixed(2)} hrs
-                    `;
-                    jobDiv.appendChild(jobInfo);
-
-                    const inputGroup = document.createElement('div');
-                    inputGroup.className = 'ot-input-group';
-
-                    const label = document.createElement('label');
-                    label.textContent = 'OT hrs:';
-                    inputGroup.appendChild(label);
-
+                    const tdDate = document.createElement('td');
+                    tdDate.className = 'ot-date-col';
+                    tdDate.textContent = job.date;
+                    
+                    const tdCustomer = document.createElement('td');
+                    tdCustomer.className = 'ot-customer-col';
+                    tdCustomer.textContent = job.customer;
+                    
+                    const tdHours = document.createElement('td');
+                    tdHours.className = 'ot-hours-col';
+                    tdHours.textContent = `${job.hours.toFixed(2)} hrs`;
+                    tdHours.style.textAlign = 'right';
+                    
+                    const tdOT = document.createElement('td');
+                    tdOT.className = 'ot-input-col';
+                    const inputWrapper = document.createElement('div');
+                    inputWrapper.className = 'ot-input-wrapper';
                     const input = document.createElement('input');
                     input.type = 'number';
                     input.step = '0.01';
@@ -742,23 +1624,146 @@
                     input.className = 'ot-hours-input';
                     input.dataset.key = `${situation.employee}_${situation.week}`;
                     input.dataset.jobIndex = job.index;
-                    inputGroup.appendChild(input);
-
-                    jobDiv.appendChild(inputGroup);
-                    jobsGrid.appendChild(jobDiv);
+                    input.addEventListener('input', () => updateOTSummary(employeeDiv, situation));
+                    const label = document.createElement('span');
+                    label.className = 'ot-hours-label';
+                    label.textContent = 'hrs';
+                    inputWrapper.appendChild(input);
+                    inputWrapper.appendChild(label);
+                    tdOT.appendChild(inputWrapper);
+                    
+                    row.appendChild(tdDate);
+                    row.appendChild(tdCustomer);
+                    row.appendChild(tdHours);
+                    row.appendChild(tdOT);
+                    tbody.appendChild(row);
                 });
 
-                employeeDiv.appendChild(jobsGrid);
+                // Summary row
+                const summaryRow = document.createElement('tr');
+                summaryRow.className = 'ot-summary-row';
+                const tdSummary1 = document.createElement('td');
+                tdSummary1.colSpan = 2;
+                tdSummary1.innerHTML = '<strong>Total</strong>';
+                const tdSummary2 = document.createElement('td');
+                tdSummary2.className = 'ot-hours-col';
+                // Calculate total hours from jobs
+                const totalHours = situation.jobs.reduce((sum, job) => sum + job.hours, 0);
+                tdSummary2.innerHTML = `<strong>${totalHours.toFixed(2)} hrs</strong>`;
+                tdSummary2.style.textAlign = 'right';
+                const tdSummary3 = document.createElement('td');
+                tdSummary3.className = 'ot-input-col';
+                tdSummary3.innerHTML = `
+                    <div>
+                        <span class="ot-total-display">Required: ${situation.total_ot_hours.toFixed(2)} hrs</span><br>
+                        <span class="ot-allocated-display">Allocated: <span class="ot-allocated-value">0.00</span> hrs</span><br>
+                        <span class="ot-remaining-display">Remaining: <span class="ot-remaining-value">${situation.total_ot_hours.toFixed(2)}</span> hrs</span>
+                    </div>
+                `;
+                summaryRow.appendChild(tdSummary1);
+                summaryRow.appendChild(tdSummary2);
+                summaryRow.appendChild(tdSummary3);
+                tbody.appendChild(summaryRow);
 
-                const warningDiv = document.createElement('div');
-                warningDiv.className = 'ot-warning';
-                warningDiv.textContent = `Total OT: ${situation.total_ot_hours.toFixed(2)} hrs - Distribute across jobs above`;
-                employeeDiv.appendChild(warningDiv);
+                table.appendChild(tbody);
+                tableWrapper.appendChild(table);
+                employeeDiv.appendChild(tableWrapper);
+
+                // Validation message
+                const validationDiv = document.createElement('div');
+                validationDiv.className = 'ot-validation-message error';
+                validationDiv.id = `validation-${empIndex}`;
+                validationDiv.textContent = `⚠ Please allocate all ${situation.total_ot_hours.toFixed(2)} overtime hours`;
+                employeeDiv.appendChild(validationDiv);
 
                 otEmployees.appendChild(employeeDiv);
             });
 
             document.getElementById('otSelection').classList.add('active');
+        }
+
+        function sortTable(employeeDiv, sortBy) {
+            const tbody = employeeDiv.querySelector('.ot-tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr:not(.ot-summary-row)'));
+            const summaryRow = tbody.querySelector('.ot-summary-row');
+            
+            // Get the clicked header BEFORE removing classes
+            const clickedHeader = employeeDiv.querySelector(`th[data-sort="${sortBy}"]`);
+            
+            // Check current sort state BEFORE removing classes
+            const isCurrentlyAsc = clickedHeader.classList.contains('sort-asc');
+            const isCurrentlyDesc = clickedHeader.classList.contains('sort-desc');
+            const isCurrentlySorted = isCurrentlyAsc || isCurrentlyDesc;
+            
+            // Determine new sort direction
+            // If clicking the same column, toggle direction. Otherwise, start with ascending.
+            const newSort = (isCurrentlySorted && isCurrentlyAsc) ? 'desc' : 'asc';
+            
+            // Remove all sort classes from all headers
+            employeeDiv.querySelectorAll('th.sortable').forEach(th => {
+                th.classList.remove('sort-asc', 'sort-desc');
+            });
+            
+            // Add sort class to clicked header
+            clickedHeader.classList.add(`sort-${newSort}`);
+            
+            // Sort rows
+            rows.sort((a, b) => {
+                let aVal, bVal;
+                
+                if (sortBy === 'date') {
+                    aVal = new Date(a.dataset.date);
+                    bVal = new Date(b.dataset.date);
+                } else if (sortBy === 'customer') {
+                    aVal = a.dataset.customer;
+                    bVal = b.dataset.customer;
+                } else if (sortBy === 'hours') {
+                    aVal = parseFloat(a.dataset.hours);
+                    bVal = parseFloat(b.dataset.hours);
+                }
+                
+                if (sortBy === 'date' || sortBy === 'hours') {
+                    // Numeric/date comparison
+                    if (newSort === 'asc') {
+                        return aVal - bVal;
+                    } else {
+                        return bVal - aVal;
+                    }
+                } else {
+                    // String comparison
+                    if (aVal < bVal) return newSort === 'asc' ? -1 : 1;
+                    if (aVal > bVal) return newSort === 'asc' ? 1 : -1;
+                    return 0;
+                }
+            });
+            
+            // Re-append rows in sorted order
+            rows.forEach(row => tbody.insertBefore(row, summaryRow));
+        }
+
+        function updateOTSummary(employeeDiv, situation) {
+            const inputs = employeeDiv.querySelectorAll('.ot-hours-input');
+            let total = 0;
+            inputs.forEach(input => {
+                total += parseFloat(input.value) || 0;
+            });
+            
+            const allocatedSpan = employeeDiv.querySelector('.ot-allocated-value');
+            const remainingSpan = employeeDiv.querySelector('.ot-remaining-value');
+            const validationDiv = employeeDiv.querySelector('.ot-validation-message');
+            
+            if (allocatedSpan) allocatedSpan.textContent = total.toFixed(2);
+            if (remainingSpan) remainingSpan.textContent = Math.max(0, situation.total_ot_hours - total).toFixed(2);
+            
+            if (validationDiv) {
+                if (Math.abs(total - situation.total_ot_hours) < 0.01) {
+                    validationDiv.className = 'ot-validation-message success';
+                    validationDiv.textContent = '✓ All overtime hours allocated correctly';
+                } else {
+                    validationDiv.className = 'ot-validation-message error';
+                    validationDiv.textContent = `⚠ Please allocate all ${situation.total_ot_hours.toFixed(2)} overtime hours (${total.toFixed(2)} allocated, ${(situation.total_ot_hours - total).toFixed(2)} remaining)`;
+                }
+            }
         }
 
         function displayResults(data) {

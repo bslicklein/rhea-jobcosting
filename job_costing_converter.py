@@ -3,6 +3,7 @@ import numpy as np
 from datetime import datetime
 import sys
 import json
+from employee_master import is_employee_salaried, get_employee_rate, validate_employees_against_paychex
 
 def parse_duration_to_hours(duration_str):
     """
@@ -97,14 +98,21 @@ def detect_overtime_and_prepare_selection(week1_file, week2_file):
     print(weekly_hours[weekly_hours['Total_Week_Hours'] > 40].to_string())
 
     # Find OT situations (before merging to avoid duplicates)
+    # Only include hourly employees - skip salaried employees
     ot_situations = []
     for _, row in weekly_hours[weekly_hours['Total_Week_Hours'] > 40].iterrows():
         emp_name = row['Employee_Name']
+        
+        # Skip salaried employees - they don't need OT allocation
+        if is_employee_salaried(emp_name):
+            print(f"\n[DEBUG] Skipping OT allocation for salaried employee: {emp_name}")
+            continue
+        
         week = row['Week']
         total_week_hours = row['Total_Week_Hours']
         total_ot = total_week_hours - 40
 
-        print(f"\n[DEBUG] Processing OT for {emp_name}, Week {week}: {total_week_hours} total hrs, {total_ot} OT hrs")
+        print(f"\n[DEBUG] Processing OT for hourly employee {emp_name}, Week {week}: {total_week_hours} total hrs, {total_ot} OT hrs")
 
         # Get jobs worked during this week
         group = df_work[(df_work['Employee_Name'] == emp_name) & (df_work['Week'] == week)]
@@ -157,7 +165,7 @@ def process_paychex_files(week1_file, week2_file, output_file='job_costing_outpu
             df_week1 = pd.read_excel(week1_file, skiprows=4)
     except Exception as e:
         print(f"❌ Error reading Week 1 file: {e}")
-        return None, None
+        return None, None, None
 
     print(f"📂 Reading Week 2 file: {week2_file}")
     try:
@@ -168,8 +176,8 @@ def process_paychex_files(week1_file, week2_file, output_file='job_costing_outpu
             df_week2 = pd.read_excel(week2_file, skiprows=4)
     except Exception as e:
         print(f"❌ Error reading Week 2 file: {e}")
-        return None, None
-    
+        return None, None, None
+
     # Add week identifier to each dataframe
     df_week1['Week'] = 1
     df_week2['Week'] = 2
@@ -196,7 +204,7 @@ def process_paychex_files(week1_file, week2_file, output_file='job_costing_outpu
         print("   - Customer full name")
         print("   - Duration (HH:MM format)")
         print("   - Rates")
-        return None, None
+        return None, None, None
 
     # Parse duration to decimal hours
     df_combined['Hours_Decimal'] = df_combined['Duration'].apply(parse_duration_to_hours)
@@ -233,7 +241,20 @@ def process_paychex_files(week1_file, week2_file, output_file='job_costing_outpu
         print("   This could mean:")
         print("   - Employee names are not being detected correctly")
         print("   - File format is different than expected")
-        return None, None
+        return None, None, None
+
+    # Validate all employees exist in the master file
+    paychex_employees = df_work['Employee_Name'].unique().tolist()
+    validation = validate_employees_against_paychex(paychex_employees)
+
+    if not validation['valid']:
+        print(f"⚠️  Found {len(validation['unknown'])} employees not in master roster:")
+        for emp in validation['unknown']:
+            print(f"   - {emp}")
+        print()
+        print("   Please add these employees to the roster before processing.")
+        # Return the unknown employees so the UI can prompt the user
+        return None, None, validation['unknown']
 
     # Calculate weekly hours by employee to determine overtime
     weekly_hours = df_work.groupby(['Employee_Name', 'Week'])['Hours_Decimal'].sum().reset_index()
@@ -280,11 +301,24 @@ def process_paychex_files(week1_file, week2_file, output_file='job_costing_outpu
         df_work['Regular_Hours'] = result[0]
         df_work['OT_Hours'] = result[1]
     
-    # Get the rate for each employee (from their billable entries)
-    employee_rates = df_work[df_work['Rates'].notna()].groupby('Employee_Name')['Rates'].first().to_dict()
-    
+    # Calculate total hours per employee for salaried rate adjustment
+    employee_total_hours = df_work.groupby('Employee_Name')['Hours_Decimal'].sum().to_dict()
+
+    # Get rate for each employee from master file with salaried adjustment
+    def get_rate_for_employee(emp_name):
+        """Look up employee rate from master file, applying salaried adjustment if needed"""
+        total_hours = employee_total_hours.get(emp_name, 80.0)
+        rate, base_rate, is_adjusted = get_employee_rate(emp_name, total_hours)
+        if rate is not None:
+            return rate
+        # Fallback (should not happen since we validated earlier)
+        print(f"⚠️  Warning: No rate found for {emp_name}, using 0")
+        return 0.0
+
+    # Apply rates from employee master file
+    df_work['Hourly_Rate'] = df_work['Employee_Name'].apply(get_rate_for_employee)
+
     # Calculate costs
-    df_work['Hourly_Rate'] = df_work['Employee_Name'].map(employee_rates)
     df_work['Regular_Cost'] = df_work['Regular_Hours'] * df_work['Hourly_Rate']
     df_work['OT_Cost'] = df_work['OT_Hours'] * df_work['Hourly_Rate'] * 1.5  # Time and a half
     df_work['Total_Cost'] = df_work['Regular_Cost'] + df_work['OT_Cost']
@@ -363,8 +397,8 @@ def process_paychex_files(week1_file, week2_file, output_file='job_costing_outpu
     print(f"   - Sheet 3: Detailed Records (audit trail)")
     print()
     print("=" * 70)
-    
-    return summary, employee_totals
+
+    return summary, employee_totals, None
 
 if __name__ == "__main__":
     # Example usage
@@ -382,4 +416,9 @@ if __name__ == "__main__":
         output_file = "job_costing_output.xlsx"
     
     # Process the files
-    summary, totals = process_paychex_files(week1_file, week2_file, output_file)
+    summary, totals, unknown_employees = process_paychex_files(week1_file, week2_file, output_file)
+
+    if unknown_employees:
+        print(f"\n⚠️  Cannot process: {len(unknown_employees)} unknown employees need to be added to roster first.")
+        for emp in unknown_employees:
+            print(f"   - {emp}")

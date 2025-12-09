@@ -1,0 +1,159 @@
+{
+  "last_updated": "2025-12-08T17:28:53.500563",
+  "employees": [
+    {
+      "name": "Alyssa R Monaghan",
+      "employee_type": "hourly",
+      "base_rate": 34.0,
+      "qb_indirect_code": "Y - Indirect Employee Labor:ARM",
+      "qb_direct_code": "Y - Direct Employee Labor:Scientist II"
+    },
+    {
+      "name": "Amy C. Brown",
+      "employee_type": "salaried",
+      "base_rate": 39.86,
+      "qb_indirect_code": "Y - Indirect Employee Labor:AB",
+      "qb_direct_code": "Y - Direct Employee Labor:Secretary III"
+    },
+    {
+      "name": "Andrew B. Shaw",
+      "employee_type": "hourly",
+      "base_rate": 25.0,
+      "qb_indirect_code": "Y - Indirect Employee Labor:ABS",
+      "qb_direct_code": "Y - Direct Employee Labor:Geo Spec I"
+    },
+    {
+      "name": "Ann L. Clarke",
+      "employee_type": "hourly",
+      "base_rate": 68.18,
+      "qb_indirect_code": "Y - Indirect Employee Labor:ALC",
+      "qb_direct_code": "Y - Direct Employee Labor:Program Specialist I"
+    },
+    {
+      "name": "Brad A McCalla",
+      "employee_type": "salaried",
+      "base_rate": 67.1,
+      "qb_indirect_code": "Y - Indirect Employee Labor:BAM",
+      "qb_direct_code": "Y - Direct Employee Labor:PM II"
+    },
+    {
+      "name": "Derek J. Horneman",
+      "employee_type": "hourly",
+      "base_rate": 35.0,
+      "qb_indirect_code": "Y - Indirect Employee Labor:DJH",
+      "qb_direct_code": "Y - Direct Employee Labor:Survey Crew Chief"
+    },
+    {
+      "name": "Gabrielle Demosthene",
+      "employee_type": "salaried",
+      "base_rate": 35.7,
+      "qb_indirect_code": "Y - Indirect Employee Labor:GD",
+      "qb_direct_code": "Y - Direct Employee Labor:Cost Analyst"
+    },
+    {
+      "name": "James R. Ferguson",
+      "employee_type": "salaried",
+      "base_rate": 40.66,
+      "qb_indirect_code": "Y - Indirect Employee Labor:JRF",
+      "qb_direct_code": "Y - Direct Employee Labor:Geologist III"
+    },
+    {
+      "name": "Jeffrey A. Liebdzinski",
+      "employee_type": "hourly",
+      "base_rate": 39.34,
+      "qb_indirect_code": "Y - Indirect Employee Labor:JAL",
+      "qb_direct_code": "Y - Direct Employee Labor:Designer"
+    },
+    {
+      "name": "Jeffrey Martinelli",
+      "employee_type": "salaried",
+      "base_rate": 41.84,
+      "qb_indirect_code": "Y - Indirect Employee Labor:JM",
+      "qb_direct_code": "Y - Direct Employee Labor:TMP Comm/Public Outreach Coord"
+    },
+    {
+      "name": "Liam J. Stubanas",
+      "employee_type": "hourly",
+      "base_rate": 34.5,
+      "qb_indirect_code": "Y - Indirect Employee Labor:LJS",
+      "qb_direct_code": "Y - Direct Employee Labor:Engineering Spec II"
+    },
+    {
+      "name": "Lori A. Frye",
+      "employee_type": "hourly",
+      "base_rate": 45.0,
+      "qb_indirect_code": "Y - Indirect Employee Labor:LAF",
+      "qb_direct_code": "Y - Direct Employee Labor:Archaeo. Tech."
+    },
+    {
+      "name": "Lynn M Tomlinson",
+      "employee_type": "hourly",
+      "base_rate": 23.54,
+      "qb_indirect_code": "Y - Indirect Employee Labor:LMT",
+      "qb_direct_code": "Y - Direct Employee Labor:Secretary I"
+    },
+    {
+      "name": "Marcella J. Gallick",
+      "employee_type": "salaried",
+      "base_rate": 67.36,
+      "qb_indirect_code": "Y - Indirect Employee Labor:MG",
+      "qb_direct_code": "Y - Direct Employee Labor:PM II"
+    },
+    {
+      "name": "Mark E. Scappe",
+      "employee_type": "salaried",
+      "base_rate": 61.32,
+      "qb_indirect_code": "Y - Indirect Employee Labor:MES",
+      "qb_direct_code": "Y - Direct Employee Labor:PM II"
+    },
+    {
+      "name": "Marko Milojkovic",
+      "employee_type": "hourly",
+      "base_rate": 24.0,
+      "qb_indirect_code": "Y - Indirect Employee Labor:MM",
+      "qb_direct_code": "Y - Direct Employee Labor:Survey Technician"
+    },
+    {
+      "name": "Megan E. Seivert",
+      "employee_type": "hourly",
+      "base_rate": 24.04,
+      "qb_indirect_code": "Y - Indirect Employee Labor:Mseivert",
+      "qb_direct_code": "Y - Direct Employee Labor:Secretary II"
+    },
+    {
+      "name": "Monica L Blasko",
+      "employee_type": "hourly",
+      "base_rate": 35.0,
+      "qb_indirect_code": "Y - Indirect Employee Labor:MB",
+      "qb_direct_code": "Y - Direct Employee Labor:Architectural Spec I"
+    },
+    {
+      "name": "Nadia E Johnson",
+      "employee_type": "hourly",
+      "base_rate": 33.72,
+      "qb_indirect_code": "Y - Indirect Employee Labor:NJ",
+      "qb_direct_code": "Y - Direct Employee Labor:Archaeo. II"
+    },
+    {
+      "name": "Roxanne K. Beall",
+      "employee_type": "hourly",
+      "base_rate": 37.26,
+      "qb_indirect_code": "Y - Indirect Employee Labor:RKB",
+      "qb_direct_code": "Y - Direct Employee Labor:Assist. Proj. Mgr."
+    },
+    {
+      "name": "Thomas C. Smit",
+      "employee_type": "hourly",
+      "base_rate": 40.0,
+      "qb_indirect_code": "Y - Indirect Employee Labor:TCS",
+      "qb_direct_code": "Y - Direct Employee Labor:Chief of Surveys"
+    },
+    {
+      "name": "Thomas R. Stahl",
+      "employee_type": "salaried",
+      "base_rate": 55.04,
+      "qb_indirect_code": "Y - Indirect Employee Labor:TRS",
+      "qb_direct_code": "Y - Direct Employee Labor:Engineer IV"
+    }
+  ]
+}
