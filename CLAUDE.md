@@ -115,6 +115,7 @@ QuickBooks exports must have these columns (after 4 header rows skipped):
 2. **1.5× multiplier** for overtime hours
 3. **Salaried rate adjustment**: When salaried employees work >80 hours/pay period, their effective rate decreases to maintain fixed salary total
 4. **OT allocation format**: `{employee_week: job_key}` - uses stable content-based keys instead of indices
+5. **Penny-perfect totals**: For salaried employees with >80 hours, job entry amounts are calculated using Python's `Decimal` module to ensure they sum EXACTLY to `base_rate × 80` (the correct salary). The last job entry absorbs any remaining cents ("plug" adjustment) to guarantee penny-perfect reconciliation. This works with or without Paychex data.
 
 ## OT Allocation Technical Details
 
@@ -149,3 +150,4 @@ This was implemented to fix an index mismatch bug where dataframe indices change
 3. **UI improvements**: Fixed white text on tables, show all summary rows, added rate columns
 4. **New modules**: `paychex_parser.py` and `reconciliation.py` for Paychex validation
 5. **Fixed Employee Totals display**: Explicit column ordering (Employee_Name first), fixed $NaN display for conditional rate columns
+6. **Penny-perfect precision for salaried employees**: Added `calculate_precise_salaried_amounts()` function using Python's `Decimal` module to eliminate rounding errors. Job entry amounts for salaried employees with >80 hours now sum EXACTLY to `base_rate × 80`. Works with or without Paychex file - eliminates need for manual "plug" adjustments in QuickBooks.

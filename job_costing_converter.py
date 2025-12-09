@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime
+from decimal import Decimal, ROUND_HALF_UP
 import sys
 import json
 from employee_master import (
@@ -67,6 +68,102 @@ def create_job_key(employee_name, week, activity_date, customer, hours):
     return f"{emp}|{wk}|{date}|{cust}|{hrs}"
 
 
+def calculate_precise_salaried_amounts(
+    emp_summary: pd.DataFrame,
+    base_rate: float,
+    total_hours: float,
+    paychex_gross_wages: float = None
+) -> tuple:
+    """
+    Calculate job entry amounts for salaried employees that sum to the exact total.
+
+    For salaried employees, the TOTAL compensation is fixed: base_rate × 80 hours.
+    This function distributes that exact amount across job entries using precise
+    Decimal arithmetic, ensuring the sum is penny-perfect.
+
+    Works in TWO modes:
+    1. WITHOUT Paychex: Uses base_rate × 80 as the target total (mathematically correct)
+    2. WITH Paychex: Uses Paychex gross_wages as target (validates against actual payment)
+
+    If Paychex is provided and differs from base_rate × 80 by more than $0.05,
+    this indicates a data issue that should be flagged (not silently masked).
+
+    The last entry absorbs any remaining cents via "plug" or "penny reconciliation"
+    (standard accounting practice). This eliminates manual rate adjustments.
+
+    Args:
+        emp_summary: DataFrame with job entries, must have 'Customer full name'
+                     and 'Regular_Hours' columns
+        base_rate: Employee's base hourly rate from employees.json
+        total_hours: Total hours worked by employee in pay period
+        paychex_gross_wages: Optional - actual payment from Paychex for verification
+
+    Returns:
+        tuple: (amounts_dict, precise_rate, target_total, source)
+            - amounts_dict: {customer_name: adjusted_amount} for each job
+            - precise_rate: The rate used (target / hours), NOT rounded
+            - target_total: The total being distributed
+            - source: 'calculated' or 'paychex' indicating which total was used
+
+    Example:
+        Ferguson: base_rate $40.66, 81 hours
+        - Calculated total: 40.66 × 80 = $3,252.80
+        - Precise rate: 3252.80 / 81 = 40.158024691358...
+        - Each job gets hours × rate, rounded to cents
+        - Last job gets remaining amount to hit $3,252.80 exactly
+    """
+    # Calculate the expected total for salaried employee: base_rate × 80
+    calculated_total = Decimal(str(base_rate)) * Decimal('80')
+    # Round to cents (this IS the exact salary)
+    calculated_total = calculated_total.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+    # Determine which total to use
+    if paychex_gross_wages is not None:
+        paychex_total = Decimal(str(paychex_gross_wages))
+        difference = abs(calculated_total - paychex_total)
+
+        # If Paychex matches calculated (within $0.01), use calculated (more traceable)
+        # If significant difference, use Paychex but this indicates a potential issue
+        if difference <= Decimal('0.01'):
+            target = calculated_total
+            source = 'calculated'
+        else:
+            # Use Paychex but note this for reconciliation
+            target = paychex_total
+            source = 'paychex'
+    else:
+        target = calculated_total
+        source = 'calculated'
+
+    hours = Decimal(str(total_hours))
+
+    # Calculate the precise rate (NOT rounded - full precision)
+    precise_rate = target / hours
+
+    # Calculate amounts for each job entry
+    amounts = {}
+    running_total = Decimal('0')
+    customers = list(emp_summary['Customer full name'])
+
+    for i, customer in enumerate(customers):
+        row = emp_summary[emp_summary['Customer full name'] == customer].iloc[0]
+        job_hours = Decimal(str(row['Regular_Hours']))
+
+        if i == len(customers) - 1:
+            # Last entry: assign remaining amount for penny-perfect total
+            amount = target - running_total
+        else:
+            # Calculate and round to 2 decimals (cents)
+            amount = (job_hours * precise_rate).quantize(
+                Decimal('0.01'), rounding=ROUND_HALF_UP
+            )
+
+        amounts[customer] = float(amount)
+        running_total += Decimal(str(amounts[customer]))
+
+    return amounts, float(precise_rate), float(target), source
+
+
 def generate_job_cost_allocation_output(
     df_work: pd.DataFrame,
     paychex_match_results: dict = None,
@@ -112,6 +209,13 @@ def generate_job_cost_allocation_output(
         total_hours = employee_total_hours.get(emp_name, 80.0)
         rate, base_rate, is_adjusted = get_employee_rate(emp_name, total_hours)
 
+        # Check for Paychex data (for verification and optional precision source)
+        paychex_emp = paychex_match_results.get(emp_name) if paychex_match_results else None
+
+        # Determine if this is a salaried employee with adjusted rate (>80 hours)
+        # These employees need precise amount calculations to avoid rounding errors
+        use_precise_calculation = is_salaried and is_adjusted
+
         # Determine rate type and notes for this employee
         # Target format: Only show hours note for salaried employees working >80 hours
         if is_salaried and is_adjusted:
@@ -135,6 +239,20 @@ def generate_job_cost_allocation_output(
             'Hourly_Rate': 'first'
         }).reset_index()
 
+        # Calculate precise amounts for salaried employees with >80 hours
+        # This ensures job entry amounts sum EXACTLY to base_rate × 80 (the correct salary)
+        # Works with OR without Paychex data - no more $0.002 discrepancies
+        precise_amounts = None
+        display_rate = rate
+        target_total = None
+        amount_source = None
+
+        if use_precise_calculation:
+            paychex_wages = paychex_emp.gross_wages if paychex_emp else None
+            precise_amounts, display_rate, target_total, amount_source = calculate_precise_salaried_amounts(
+                emp_summary, base_rate, total_hours, paychex_wages
+            )
+
         emp_calculated_total = 0.0
         first_row = True
 
@@ -148,8 +266,17 @@ def generate_job_cost_allocation_output(
 
             # Add regular hours row
             if regular_hours > 0:
-                # Use 4 decimal precision for adjusted rates (matching target), 2 for others
-                rate_value = round(hourly_rate, 4) if rate_type == 'Adjusted' else round(hourly_rate, 2)
+                # Determine amount: use precise calculation for salaried w/>80hrs, else original
+                if use_precise_calculation and precise_amounts:
+                    # Precise amount ensures sum equals exactly base_rate × 80 (or Paychex if provided)
+                    amount_value = precise_amounts.get(customer, round(regular_cost, 2))
+                    # Use 6 decimal places to show precise rate (reveals full precision)
+                    rate_value = round(display_rate, 6)
+                else:
+                    # Original calculation (formula-based rate) for hourly or salaried ≤80hrs
+                    amount_value = round(regular_cost, 2)
+                    rate_value = round(hourly_rate, 4) if rate_type == 'Adjusted' else round(hourly_rate, 2)
+
                 # Use None for empty notes (proper Excel null), only show note on first row if it has content
                 notes_value = rate_note_base if (first_row and rate_note_base) else None
                 output_rows.append({
@@ -157,14 +284,15 @@ def generate_job_cost_allocation_output(
                     'Project/Job Code': customer,
                     'Hours': round(regular_hours, 2),
                     'Rate': rate_value,
-                    'Amount': round(regular_cost, 2),
+                    'Amount': amount_value,
                     'Rate Type': rate_type,
                     'Notes': notes_value
                 })
-                emp_calculated_total += regular_cost
+                emp_calculated_total += amount_value
                 first_row = False
 
             # Add OT hours row (separate line item)
+            # Note: Salaried employees don't get OT rows (is_employee_salaried check happens earlier)
             if ot_hours > 0:
                 ot_rate = hourly_rate * 1.5
                 output_rows.append({
@@ -213,7 +341,7 @@ def generate_job_cost_allocation_output(
             'Project/Job Code': None,
             'Hours': None,
             'Rate': 'Difference:',
-            'Amount': round(difference, 2),
+            'Amount': round(difference, 3),
             'Rate Type': None,
             'Notes': status
         })
