@@ -97,7 +97,8 @@
       "employee_type": "salaried",
       "base_rate": 67.36,
       "qb_indirect_code": "Y - Indirect Employee Labor:MG",
-      "qb_direct_code": "Y - Direct Employee Labor:PM II"
+      "qb_direct_code": "Y - Direct Employee Labor:PM II",
+      "paychex_name": "Johnson, Marcella G."
     },
     {
       "name": "Mark E. Scappe",

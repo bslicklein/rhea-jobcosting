@@ -113,15 +113,16 @@ def generate_job_cost_allocation_output(
         rate, base_rate, is_adjusted = get_employee_rate(emp_name, total_hours)
 
         # Determine rate type and notes for this employee
+        # Target format: Only show hours note for salaried employees working >80 hours
         if is_salaried and is_adjusted:
             rate_type = 'Adjusted'
-            rate_note_base = f"Base ${base_rate:.2f} adj to ${rate:.2f} ({total_hours:.1f} hrs)"
+            rate_note_base = f"{total_hours:.1f}hrs total"  # Simplified format matching target
         elif is_salaried:
             rate_type = 'Base'
-            rate_note_base = f"{total_hours:.1f} hrs total"
+            rate_note_base = ""  # No note for standard 80-hour salaried (target shows NaN)
         else:
             rate_type = 'Base'
-            rate_note_base = ""
+            rate_note_base = ""  # No note for hourly employees on regular rows
 
         # Group by customer/project for this employee
         emp_summary = emp_data.groupby('Customer full name').agg({
@@ -147,14 +148,18 @@ def generate_job_cost_allocation_output(
 
             # Add regular hours row
             if regular_hours > 0:
+                # Use 4 decimal precision for adjusted rates (matching target), 2 for others
+                rate_value = round(hourly_rate, 4) if rate_type == 'Adjusted' else round(hourly_rate, 2)
+                # Use None for empty notes (proper Excel null), only show note on first row if it has content
+                notes_value = rate_note_base if (first_row and rate_note_base) else None
                 output_rows.append({
                     'Employee Name': emp_name,
                     'Project/Job Code': customer,
                     'Hours': round(regular_hours, 2),
-                    'Rate': round(hourly_rate, 2),
+                    'Rate': rate_value,
                     'Amount': round(regular_cost, 2),
                     'Rate Type': rate_type,
-                    'Notes': rate_note_base if first_row else ''
+                    'Notes': notes_value
                 })
                 emp_calculated_total += regular_cost
                 first_row = False
@@ -178,19 +183,20 @@ def generate_job_cost_allocation_output(
         paychex_wages = paychex_emp.gross_wages if paychex_emp else 0.0
 
         # Row 1: Calculated vs Paychex summary
+        # Use 3 decimal precision for reconciliation amounts to show actual discrepancies
         output_rows.append({
             'Employee Name': emp_name,
             'Project/Job Code': None,
             'Hours': None,
             'Rate': 'Calculated:',
-            'Amount': round(emp_calculated_total, 2),
+            'Amount': round(emp_calculated_total, 3),
             'Rate Type': 'Paychex:',
-            'Notes': round(paychex_wages, 2) if paychex_emp else 'N/A'
+            'Notes': round(paychex_wages, 3) if paychex_emp else 'N/A'
         })
 
         # Row 2: Difference and status
         if paychex_emp:
-            difference = round(emp_calculated_total - paychex_wages, 2)
+            difference = round(emp_calculated_total - paychex_wages, 3)
             abs_diff = abs(difference)
             if abs_diff == 0:
                 status = '✓ Reconciled'
@@ -294,7 +300,13 @@ def detect_overtime_and_prepare_selection(week1_file, week2_file):
     current_employee = None
     for idx, row in df_combined.iterrows():
         first_col_value = row.iloc[0]
-        if pd.isna(row['Activity date']) and not pd.isna(first_col_value):
+        activity_date = row['Activity date']
+
+        # Skip grand total rows (Activity date contains 'TOTAL' string)
+        if pd.notna(activity_date) and 'TOTAL' in str(activity_date).upper():
+            continue
+
+        if pd.isna(activity_date) and not pd.isna(first_col_value):
             if 'Total for' not in str(first_col_value):
                 current_employee = str(first_col_value).strip()
         else:
@@ -449,19 +461,25 @@ def process_paychex_files(week1_file, week2_file, output_file='job_costing_outpu
     # Create a new column to identify employee names
     # Employee names appear to be in rows where most other columns are empty
     df_combined['Employee_Name'] = None
-    
+
     current_employee = None
     for idx, row in df_combined.iterrows():
         # Check if this is an employee name row (Activity date is empty but there's text in first column)
         # Employee name is in the first column (Unnamed: 0)
         first_col_value = row.iloc[0]
-        if pd.isna(row['Activity date']) and not pd.isna(first_col_value):
+        activity_date = row['Activity date']
+
+        # Skip grand total rows (Activity date contains 'TOTAL' string)
+        if pd.notna(activity_date) and 'TOTAL' in str(activity_date).upper():
+            continue
+
+        if pd.isna(activity_date) and not pd.isna(first_col_value):
             # Check if it's not a "Total for" row
             if 'Total for' not in str(first_col_value):
                 current_employee = str(first_col_value).strip()
         else:
             df_combined.at[idx, 'Employee_Name'] = current_employee
-    
+
     # Remove rows without employee names (header rows, total rows, etc.)
     df_work = df_combined[df_combined['Employee_Name'].notna()].copy()
     
@@ -731,65 +749,30 @@ def process_paychex_files(week1_file, week2_file, output_file='job_costing_outpu
             import traceback
             traceback.print_exc()
 
-    # Generate output file
+    # Generate output file - ALWAYS use unified Job Cost Allocation format
     print(f"\n💾 Writing output to: {output_file}")
 
+    # Always use single-sheet Job Cost Allocation format (unified output)
+    # When Paychex is provided: full reconciliation with ✓/⚡/⚠️ status
+    # When Paychex is missing: reconciliation shows "N/A" and "⚠️ NO PAYCHEX"
+    output_summary = generate_job_cost_allocation_output(
+        df_work=df_work,
+        paychex_match_results=paychex_match_results,  # May be empty dict if no Paychex
+        reconciliation_report=reconciliation_report,   # May be None if no Paychex
+        output_file=output_file
+    )
+
+    print("✅ Job costing conversion complete!")
+    print()
+    print(f"📈 Output file created: {output_file}")
     if paychex_payroll_file and paychex_match_results:
-        # Use new single-sheet format with reconciliation
-        output_summary = generate_job_cost_allocation_output(
-            df_work=df_work,
-            paychex_match_results=paychex_match_results,
-            reconciliation_report=reconciliation_report,
-            output_file=output_file
-        )
-
-        print("✅ Job costing conversion complete!")
-        print()
-        print(f"📈 Output file created: {output_file}")
-        print(f"   - Sheet: Job Cost Allocation (with reconciliation)")
-        print()
-        print("=" * 70)
-
-        return summary, employee_totals, None, reconciliation_summary
-
+        print(f"   - Sheet: Job Cost Allocation (with Paychex reconciliation)")
     else:
-        # Use original 3-sheet format (no Paychex validation)
-        with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
-            # Write main summary
-            summary.to_excel(writer, sheet_name='Job Costing Summary', index=False)
+        print(f"   - Sheet: Job Cost Allocation (no Paychex - reconciliation shows N/A)")
+    print()
+    print("=" * 70)
 
-            # Write employee totals
-            employee_totals.to_excel(writer, sheet_name='Employee Totals', index=False)
-
-            # Write detailed data for audit trail
-            df_work[['Employee_Name', 'Activity date', 'Customer full name', 'Description',
-                     'Week', 'Hours_Decimal', 'Regular_Hours', 'OT_Hours', 'Hourly_Rate',
-                     'Total_Cost']].to_excel(writer, sheet_name='Detailed Records', index=False)
-
-            # Format the main summary sheet
-            workbook = writer.book
-            worksheet = writer.sheets['Job Costing Summary']
-
-            # Set column widths
-            worksheet.column_dimensions['A'].width = 25  # Employee Name
-            worksheet.column_dimensions['B'].width = 50  # Customer Name
-            worksheet.column_dimensions['C'].width = 15  # Regular Hours
-            worksheet.column_dimensions['D'].width = 15  # OT Hours
-            worksheet.column_dimensions['E'].width = 15  # Hourly Rate
-            worksheet.column_dimensions['F'].width = 15  # Regular Cost
-            worksheet.column_dimensions['G'].width = 15  # OT Cost
-            worksheet.column_dimensions['H'].width = 15  # Total Cost
-
-        print("✅ Job costing conversion complete!")
-        print()
-        print(f"📈 Output file created: {output_file}")
-        print(f"   - Sheet 1: Job Costing Summary (by employee & customer)")
-        print(f"   - Sheet 2: Employee Totals")
-        print(f"   - Sheet 3: Detailed Records (audit trail)")
-        print()
-        print("=" * 70)
-
-        return summary, employee_totals, None, None
+    return summary, employee_totals, None, reconciliation_summary
 
 if __name__ == "__main__":
     # Example usage
