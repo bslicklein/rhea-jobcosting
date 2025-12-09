@@ -20,17 +20,22 @@ DEFAULT_EMPLOYEES_FILE = os.path.join(os.path.dirname(__file__), 'employees.json
 @dataclass
 class Employee:
     """Employee data structure"""
-    name: str                    # Name as it appears in Paychex
+    name: str                    # Name as it appears in QuickBooks
     employee_type: str           # 'salaried' or 'hourly'
     base_rate: float             # Base hourly rate
     qb_indirect_code: str = ""   # QuickBooks indirect labor code
     qb_direct_code: str = ""     # QuickBooks direct labor code
+    paychex_name: str = ""       # Name as it appears in Paychex (if different from QB)
 
     def is_salaried(self) -> bool:
         return self.employee_type.lower() == 'salaried'
 
     def is_hourly(self) -> bool:
         return self.employee_type.lower() == 'hourly'
+
+    def get_paychex_name(self) -> str:
+        """Get the Paychex name (uses QB name if no alias set)."""
+        return self.paychex_name if self.paychex_name else self.name
 
 
 def load_employees(filepath: str = DEFAULT_EMPLOYEES_FILE) -> Dict[str, Employee]:
@@ -53,7 +58,8 @@ def load_employees(filepath: str = DEFAULT_EMPLOYEES_FILE) -> Dict[str, Employee
                 employee_type=emp_data['employee_type'],
                 base_rate=float(emp_data['base_rate']),
                 qb_indirect_code=emp_data.get('qb_indirect_code', ''),
-                qb_direct_code=emp_data.get('qb_direct_code', '')
+                qb_direct_code=emp_data.get('qb_direct_code', ''),
+                paychex_name=emp_data.get('paychex_name', '')
             )
             employees[emp.name] = emp
 
@@ -96,14 +102,30 @@ def get_employee_list() -> List[Dict]:
             'base_rate': emp.base_rate,
             'qb_indirect_code': emp.qb_indirect_code,
             'qb_direct_code': emp.qb_direct_code,
+            'paychex_name': emp.paychex_name,
             'is_salaried': emp.is_salaried()
         }
         for emp in employees.values()
     ]
 
 
+def get_paychex_name_aliases() -> Dict[str, str]:
+    """
+    Get mapping of QB names to Paychex names for employees with aliases.
+
+    Returns: Dict mapping QB name -> Paychex name (only for employees with aliases)
+    """
+    employees = load_employees()
+    return {
+        emp.name: emp.paychex_name
+        for emp in employees.values()
+        if emp.paychex_name and emp.paychex_name != emp.name
+    }
+
+
 def update_employee(name: str, employee_type: str, base_rate: float,
-                   qb_indirect_code: str = "", qb_direct_code: str = "") -> bool:
+                   qb_indirect_code: str = "", qb_direct_code: str = "",
+                   paychex_name: str = "") -> bool:
     """
     Add or update a single employee
     """
@@ -113,7 +135,8 @@ def update_employee(name: str, employee_type: str, base_rate: float,
         employee_type=employee_type,
         base_rate=base_rate,
         qb_indirect_code=qb_indirect_code,
-        qb_direct_code=qb_direct_code
+        qb_direct_code=qb_direct_code,
+        paychex_name=paychex_name
     )
     return save_employees(employees)
 
@@ -237,7 +260,8 @@ def bulk_update_employees(employees_data: List[Dict]) -> bool:
             employee_type=emp_data['employee_type'],
             base_rate=float(emp_data['base_rate']),
             qb_indirect_code=emp_data.get('qb_indirect_code', ''),
-            qb_direct_code=emp_data.get('qb_direct_code', '')
+            qb_direct_code=emp_data.get('qb_direct_code', ''),
+            paychex_name=emp_data.get('paychex_name', '')
         )
     return save_employees(employees)
 

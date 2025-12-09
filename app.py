@@ -39,6 +39,7 @@ def upload_files():
 
         week1_file = request.files['week1File']
         week2_file = request.files['week2File']
+        paychex_file = request.files.get('paychexFile')  # Optional Paychex payroll file
 
         # Validate files
         if week1_file.filename == '' or week2_file.filename == '':
@@ -47,12 +48,25 @@ def upload_files():
         if not (allowed_file(week1_file.filename) and allowed_file(week2_file.filename)):
             return jsonify({'error': 'Invalid file type. Allowed types: .txt, .csv, .xlsx, .xls'}), 400
 
+        # Validate Paychex file if provided
+        paychex_path = None
+        if paychex_file and paychex_file.filename != '':
+            if not allowed_file(paychex_file.filename):
+                return jsonify({'error': 'Invalid Paychex file type. Allowed types: .xls, .xlsx'}), 400
+
         # Save uploaded files
         week1_filename = secure_filename(week1_file.filename)
         week2_filename = secure_filename(week2_file.filename)
 
         week1_path = os.path.join(app.config['UPLOAD_FOLDER'], f"week1_{datetime.now().timestamp()}_{week1_filename}")
         week2_path = os.path.join(app.config['UPLOAD_FOLDER'], f"week2_{datetime.now().timestamp()}_{week2_filename}")
+
+        # Save Paychex file if provided
+        if paychex_file and paychex_file.filename != '':
+            paychex_filename = secure_filename(paychex_file.filename)
+            paychex_path = os.path.join(app.config['UPLOAD_FOLDER'], f"paychex_{datetime.now().timestamp()}_{paychex_filename}")
+            paychex_file.save(paychex_path)
+            print(f"  Paychex: {paychex_path} ({os.path.getsize(paychex_path)} bytes)")
 
         week1_file.save(week1_path)
         week2_file.save(week2_path)
@@ -83,10 +97,11 @@ def upload_files():
             # Generate unique session ID
             session_id = f"session_{datetime.now().timestamp()}"
 
-            # Store file paths and data for phase 2
+            # Store file paths and data for phase 2 (including optional Paychex file)
             temp_storage[session_id] = {
                 'week1_path': week1_path,
                 'week2_path': week2_path,
+                'paychex_path': paychex_path,  # May be None
                 'timestamp': datetime.now()
             }
 
@@ -104,19 +119,28 @@ def upload_files():
         sys.stdout = captured_output = StringIO()
 
         try:
-            summary, totals, unknown_employees = process_paychex_files(week1_path, week2_path, output_path)
+            # Pass paychex_path for validation (may be None)
+            summary, totals, unknown_employees, reconciliation = process_paychex_files(
+                week1_path, week2_path, output_path,
+                paychex_payroll_file=paychex_path
+            )
         except Exception as e:
             sys.stdout = old_stdout
             if os.path.exists(week1_path):
                 os.remove(week1_path)
             if os.path.exists(week2_path):
                 os.remove(week2_path)
+            if paychex_path and os.path.exists(paychex_path):
+                os.remove(paychex_path)
             raise e
         finally:
             sys.stdout = old_stdout
 
+        # Clean up temp files
         os.remove(week1_path)
         os.remove(week2_path)
+        if paychex_path and os.path.exists(paychex_path):
+            os.remove(paychex_path)
 
         # Check if there are unknown employees that need to be added to roster
         if unknown_employees:
@@ -135,12 +159,13 @@ def upload_files():
 
         response = {
             'success': True,
-            'message': 'Files processed successfully',
+            'message': 'Files processed successfully' + (' with Paychex validation' if reconciliation else ''),
             'outputFile': output_filename,
             'outputPath': output_path,
-            'summary': summary_data[:10],  # First 10 rows for preview
+            'summary': summary_data,
             'totals': totals_data,
-            'totalRecords': len(summary_data)
+            'totalRecords': len(summary_data),
+            'reconciliation': reconciliation  # Reconciliation data (or None)
         }
 
         return jsonify(response), 200
@@ -176,10 +201,11 @@ def process_with_ot_selections():
         if not session_id or session_id not in temp_storage:
             return jsonify({'error': 'Invalid or expired session'}), 400
 
-        # Retrieve stored file paths
+        # Retrieve stored file paths (including optional Paychex file)
         session_data = temp_storage[session_id]
         week1_path = session_data['week1_path']
         week2_path = session_data['week2_path']
+        paychex_path = session_data.get('paychex_path')  # May be None
 
         # Verify files still exist
         if not os.path.exists(week1_path) or not os.path.exists(week2_path):
@@ -194,13 +220,20 @@ def process_with_ot_selections():
         sys.stdout = captured_output = StringIO()
 
         try:
-            summary, totals, unknown_employees = process_paychex_files(week1_path, week2_path, output_path, ot_allocations=ot_allocations)
+            # Pass paychex_path for validation (may be None)
+            summary, totals, unknown_employees, reconciliation = process_paychex_files(
+                week1_path, week2_path, output_path,
+                ot_allocations=ot_allocations,
+                paychex_payroll_file=paychex_path
+            )
         except Exception as e:
             sys.stdout = old_stdout
             if os.path.exists(week1_path):
                 os.remove(week1_path)
             if os.path.exists(week2_path):
                 os.remove(week2_path)
+            if paychex_path and os.path.exists(paychex_path):
+                os.remove(paychex_path)
             del temp_storage[session_id]
             raise e
         finally:
@@ -219,6 +252,8 @@ def process_with_ot_selections():
         # Clean up temp files and session
         os.remove(week1_path)
         os.remove(week2_path)
+        if paychex_path and os.path.exists(paychex_path):
+            os.remove(paychex_path)
         del temp_storage[session_id]
 
         if summary is None or totals is None:
@@ -230,12 +265,13 @@ def process_with_ot_selections():
 
         response = {
             'success': True,
-            'message': 'Files processed successfully with OT allocations',
+            'message': 'Files processed successfully with OT allocations' + (' and Paychex validation' if reconciliation else ''),
             'outputFile': output_filename,
             'outputPath': output_path,
-            'summary': summary_data[:10],
+            'summary': summary_data,
             'totals': totals_data,
-            'totalRecords': len(summary_data)
+            'totalRecords': len(summary_data),
+            'reconciliation': reconciliation  # Reconciliation data (or None)
         }
 
         return jsonify(response), 200

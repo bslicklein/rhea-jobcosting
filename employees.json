@@ -1,5 +1,5 @@
 {
-  "last_updated": "2025-12-08T18:42:21.933476",
+  "last_updated": "2025-12-08T19:27:44.567255",
   "employees": [
     {
       "name": "Alyssa R Monaghan",
@@ -142,7 +142,7 @@
       "qb_direct_code": "Y - Direct Employee Labor:Assist. Proj. Mgr."
     },
     {
-      "name": "Thomas C. Smit",
+      "name": "Thomas C Smit",
       "employee_type": "hourly",
       "base_rate": 40.0,
       "qb_indirect_code": "Y - Indirect Employee Labor:TCS",
@@ -154,13 +154,6 @@
       "base_rate": 55.04,
       "qb_indirect_code": "Y - Indirect Employee Labor:TRS",
       "qb_direct_code": "Y - Direct Employee Labor:Engineer IV"
-    },
-    {
-      "name": "Thomas C Smit",
-      "employee_type": "hourly",
-      "base_rate": 40.0,
-      "qb_indirect_code": "Y - Indirect Employee Labow:TCS",
-      "qb_direct_code": "Y - Direct Employee Labor:Chief of Surveys"
     }
   ]
 }

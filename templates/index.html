@@ -244,7 +244,7 @@
 
         .table-container {
             overflow-x: auto;
-            max-height: 500px;
+            max-height: 70vh;
             overflow-y: auto;
         }
 
@@ -269,6 +269,7 @@
             padding: 8px 10px;
             border-bottom: 1px solid #e0e0e0;
             font-size: 0.85em;
+            color: #333;
         }
 
         tr:hover {
@@ -828,30 +829,41 @@
                     <h4>Quick Start</h4>
                     <ul>
                         <li>Export Week 1 and Week 2 payroll data from QuickBooks</li>
-                        <li>Upload both files, click Process, and download your Excel report</li>
+                        <li><strong>Optional:</strong> Upload Paychex payroll file for validation (reconciliation)</li>
+                        <li>Upload files, click Process, and download your Excel report</li>
                     </ul>
                 </div>
 
                 <div class="alert alert-success" id="successAlert"></div>
                 <div class="alert alert-error" id="errorAlert"></div>
 
-                <form id="uploadForm" class="upload-section">
-                <div class="file-input-group">
-                    <label for="week1File">Week 1 QuickBooks File</label>
-                    <input type="file" id="week1File" name="week1File" class="file-input" accept=".txt,.csv,.xlsx,.xls" required>
-                    <div class="file-name" id="week1FileName"></div>
+                <form id="uploadForm">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div class="file-input-group">
+                        <label for="week1File">Week 1 QuickBooks File *</label>
+                        <input type="file" id="week1File" name="week1File" class="file-input" accept=".txt,.csv,.xlsx,.xls" required>
+                        <div class="file-name" id="week1FileName"></div>
+                    </div>
+
+                    <div class="file-input-group">
+                        <label for="week2File">Week 2 QuickBooks File *</label>
+                        <input type="file" id="week2File" name="week2File" class="file-input" accept=".txt,.csv,.xlsx,.xls" required>
+                        <div class="file-name" id="week2FileName"></div>
+                    </div>
                 </div>
 
-                <div class="file-input-group">
-                    <label for="week2File">Week 2 QuickBooks File</label>
-                    <input type="file" id="week2File" name="week2File" class="file-input" accept=".txt,.csv,.xlsx,.xls" required>
-                    <div class="file-name" id="week2FileName"></div>
-                </div>
+                <div style="display: grid; grid-template-columns: 1fr auto; gap: 15px; align-items: end;">
+                    <div class="file-input-group">
+                        <label for="paychexFile">Paychex Payroll File (Optional - for validation)</label>
+                        <input type="file" id="paychexFile" name="paychexFile" class="file-input" accept=".xls,.xlsx" style="border-color: #28a745;">
+                        <div class="file-name" id="paychexFileName" style="color: #28a745;"></div>
+                    </div>
 
-                <div class="upload-btn-wrapper">
-                    <button type="submit" class="btn btn-primary" id="processBtn">
-                        Process Files
-                    </button>
+                    <div class="upload-btn-wrapper">
+                        <button type="submit" class="btn btn-primary" id="processBtn">
+                            Process Files
+                        </button>
+                    </div>
                 </div>
             </form>
 
@@ -870,6 +882,34 @@
                     Process with Selected OT Allocations
                 </button>
             </div>
+
+                <!-- Reconciliation Results Section (shown when Paychex file is uploaded) -->
+                <div class="reconciliation-results" id="reconciliationResults" style="display: none; margin-bottom: 20px;">
+                    <div style="background: linear-gradient(135deg, #28a745 0%, #218838 100%); color: white; padding: 15px 20px; border-radius: 8px 8px 0 0;">
+                        <h3 style="margin: 0; font-size: 1.2em;">Paychex Reconciliation</h3>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 20px; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 8px 8px;">
+                        <div class="reconciliation-summary" id="reconciliationSummary" style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
+                            <!-- Summary stats will be populated by JS -->
+                        </div>
+                        <div class="reconciliation-table-container" style="max-height: 300px; overflow-y: auto;">
+                            <table id="reconciliationTable" style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background: #667eea; color: white;">
+                                        <th style="padding: 10px; text-align: left;">Employee</th>
+                                        <th style="padding: 10px; text-align: right;">Calculated</th>
+                                        <th style="padding: 10px; text-align: right;">Paychex</th>
+                                        <th style="padding: 10px; text-align: right;">Difference</th>
+                                        <th style="padding: 10px; text-align: center;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reconciliationTableBody">
+                                    <!-- Rows populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="results" id="results">
                 <div class="results-header">
@@ -1362,6 +1402,11 @@
             document.getElementById('week2FileName').textContent = fileName ? `Selected: ${fileName}` : '';
         });
 
+        document.getElementById('paychexFile').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || '';
+            document.getElementById('paychexFileName').textContent = fileName ? `Selected: ${fileName} (validation enabled)` : '';
+        });
+
         // Tab switching
         document.querySelectorAll('.tab').forEach(tab => {
             tab.addEventListener('click', function() {
@@ -1445,12 +1490,12 @@
                 const otHours = parseFloat(input.value) || 0;
                 if (otHours > 0) {
                     const key = input.dataset.key;
-                    const jobIndex = parseInt(input.dataset.jobIndex);
+                    const jobKey = input.dataset.jobKey;  // Use stable job_key instead of volatile index
 
                     if (!otAllocations[key]) {
                         otAllocations[key] = {};
                     }
-                    otAllocations[key][jobIndex] = otHours;
+                    otAllocations[key][jobKey] = otHours;  // Use job_key as the key
                 }
             });
 
@@ -1593,7 +1638,7 @@
                 
                 situation.jobs.forEach(job => {
                     const row = document.createElement('tr');
-                    row.dataset.jobIndex = job.index;
+                    row.dataset.jobKey = job.job_key;  // Use stable job_key instead of volatile index
                     row.dataset.date = job.date;
                     row.dataset.customer = job.customer.toLowerCase();
                     row.dataset.hours = job.hours;
@@ -1623,7 +1668,7 @@
                     input.value = '0';
                     input.className = 'ot-hours-input';
                     input.dataset.key = `${situation.employee}_${situation.week}`;
-                    input.dataset.jobIndex = job.index;
+                    input.dataset.jobKey = job.job_key;  // Use stable job_key instead of volatile index
                     input.addEventListener('input', () => updateOTSummary(employeeDiv, situation));
                     const label = document.createElement('span');
                     label.className = 'ot-hours-label';
@@ -1795,6 +1840,13 @@
                 </div>
             `;
 
+            // Display reconciliation results if available
+            if (data.reconciliation) {
+                displayReconciliation(data.reconciliation);
+            } else {
+                document.getElementById('reconciliationResults').style.display = 'none';
+            }
+
             // Display employee totals table
             displayTable('totals', data.totals);
 
@@ -1803,6 +1855,71 @@
 
             // Show results section
             document.getElementById('results').classList.add('active');
+        }
+
+        function displayReconciliation(recon) {
+            const reconcSection = document.getElementById('reconciliationResults');
+            const summaryDiv = document.getElementById('reconciliationSummary');
+            const tbody = document.getElementById('reconciliationTableBody');
+
+            // Build summary stats
+            summaryDiv.innerHTML = `
+                <div style="background: #d4edda; padding: 12px 20px; border-radius: 6px; text-align: center; min-width: 120px;">
+                    <div style="font-size: 1.8em; font-weight: bold; color: #155724;">${recon.reconciled}</div>
+                    <div style="font-size: 0.9em; color: #155724;">Reconciled</div>
+                </div>
+                <div style="background: #fff3cd; padding: 12px 20px; border-radius: 6px; text-align: center; min-width: 120px;">
+                    <div style="font-size: 1.8em; font-weight: bold; color: #856404;">${recon.adjusted}</div>
+                    <div style="font-size: 0.9em; color: #856404;">Adjusted</div>
+                </div>
+                <div style="background: #f8d7da; padding: 12px 20px; border-radius: 6px; text-align: center; min-width: 120px;">
+                    <div style="font-size: 1.8em; font-weight: bold; color: #721c24;">${recon.needs_review}</div>
+                    <div style="font-size: 0.9em; color: #721c24;">Need Review</div>
+                </div>
+                <div style="background: #e7f3ff; padding: 12px 20px; border-radius: 6px; text-align: center; min-width: 150px;">
+                    <div style="font-size: 1.2em; font-weight: bold; color: #1976D2;">$${recon.total_calculated.toLocaleString(undefined, {minimumFractionDigits: 2})} / $${recon.total_paychex.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                    <div style="font-size: 0.9em; color: #1976D2;">Calc / Paychex Totals</div>
+                </div>
+            `;
+
+            // Build table rows
+            tbody.innerHTML = recon.results.map(r => {
+                let statusStyle = '';
+                let statusIcon = '';
+                if (r.status === 'reconciled') {
+                    statusStyle = 'background: #d4edda; color: #155724;';
+                    statusIcon = '&#10003;';  // Checkmark
+                } else if (r.status === 'adjusted') {
+                    statusStyle = 'background: #fff3cd; color: #856404;';
+                    statusIcon = '&#9889;';  // Lightning bolt
+                } else {
+                    statusStyle = 'background: #f8d7da; color: #721c24;';
+                    statusIcon = '&#9888;';  // Warning
+                }
+
+                return `
+                    <tr>
+                        <td style="padding: 10px; border-bottom: 1px solid #dee2e6;">${r.employee}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #dee2e6; text-align: right;">$${r.calculated.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #dee2e6; text-align: right;">$${r.paychex.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #dee2e6; text-align: right; ${r.difference !== 0 ? 'color: #dc3545; font-weight: bold;' : ''}">${r.difference >= 0 ? '+' : ''}$${r.difference.toFixed(2)}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #dee2e6; text-align: center;"><span style="padding: 4px 12px; border-radius: 12px; font-size: 0.85em; ${statusStyle}">${statusIcon} ${r.status_display}</span></td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Show unmatched employees if any
+            if (recon.unmatched_qb_names && recon.unmatched_qb_names.length > 0) {
+                tbody.innerHTML += `
+                    <tr style="background: #fff3cd;">
+                        <td colspan="5" style="padding: 10px; color: #856404;">
+                            <strong>Unmatched in QuickBooks:</strong> ${recon.unmatched_qb_names.join(', ')}
+                        </td>
+                    </tr>
+                `;
+            }
+
+            reconcSection.style.display = 'block';
         }
 
         function displayTable(tableType, data) {
@@ -1831,15 +1948,21 @@
         }
 
         function formatValue(header, value) {
-            if (value === null || value === undefined) return '';
+            // Show '-' for null/undefined values (used for conditional columns like Adjusted_Rate, OT_Rate)
+            if (value === null || value === undefined) return '-';
 
             // Format currency fields
             if (header.includes('Cost') || header.includes('Amount')) {
                 return '$' + parseFloat(value).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
             }
 
-            // Format numeric fields
-            if (header.includes('Hours') || header.includes('Rate')) {
+            // Format rate fields with $ prefix
+            if (header.includes('Rate')) {
+                return '$' + parseFloat(value).toFixed(2);
+            }
+
+            // Format numeric fields (hours)
+            if (header.includes('Hours')) {
                 return parseFloat(value).toFixed(2);
             }
 
