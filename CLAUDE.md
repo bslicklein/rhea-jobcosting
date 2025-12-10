@@ -161,3 +161,33 @@ This was implemented to fix an index mismatch bug where dataframe indices change
 6. **Penny-perfect precision for salaried employees**: Added `calculate_precise_salaried_amounts()` function using Python's `Decimal` module to eliminate rounding errors. Job entry amounts for salaried employees with >80 hours now sum EXACTLY to `base_rate × 80`. Works with or without Paychex file - eliminates need for manual "plug" adjustments in QuickBooks.
 7. **Fixed OT hours double-counting**: Added invariant enforcement (`Regular_Hours = Hours_Decimal - OT_Hours`) to ensure OT hours are properly subtracted from regular hours. Previously, Excel output showed inflated totals because OT rows were added without reducing regular hours.
 8. **Added Payrolled Hours metric**: New column showing hours that should match Paychex payroll (salaried employees capped at 80). Grand totals now show both "Actual Hours Worked" and "Payrolled Hours" with explanation of the difference (unpaid salaried OT).
+9. **Added "Job Costing - By Employee" sheets**: New per-employee Excel tabs in QuickBooks Item import format for direct import into QB. Each employee gets their own sheet with columns: PRODUCT/SERVICE, DESCRIPTION, QTY, RATE, AMOUNT, CUSTOMER/PROJECT.
+
+## Per-Employee Sheets (QuickBooks Import Format)
+
+The Excel output now includes one tab per employee, formatted for QuickBooks Item import.
+
+### INDIRECT vs DIRECT Classification
+Projects are classified to determine which QB labor code to use:
+- **INDIRECT**: Project starts with `"Rhea:80"` (overhead) OR contains `"Proposal"` (case-insensitive)
+- **DIRECT**: All other projects (billable client work)
+
+### Output Column Mapping
+| Column | INDIRECT Projects | DIRECT Projects |
+|--------|-------------------|-----------------|
+| PRODUCT/SERVICE | `qb_indirect_code` from employees.json | `qb_direct_code` from employees.json |
+| DESCRIPTION | Employee full name | Job title (parsed from qb_direct_code) |
+| QTY | Hours worked | Hours worked |
+| RATE | Hourly rate | Hourly rate |
+| AMOUNT | QTY × RATE | QTY × RATE |
+| CUSTOMER/PROJECT | Project name | Project name |
+
+### OT Handling on Employee Sheets
+- OT hours appear as separate rows with "(OT)" appended to DESCRIPTION
+- OT rate is 1.5× the regular rate
+- Salaried employees never have OT rows (they get rate adjustment instead)
+
+### Helper Functions (job_costing_converter.py)
+- `is_indirect_project(customer_name)`: Returns True if project is indirect
+- `get_job_title_from_direct_code(qb_direct_code)`: Extracts job title from QB code
+- `generate_by_employee_sheets(writer, df_work, employees_data, employee_total_hours)`: Creates all employee sheets

@@ -1,174 +1,197 @@
 {
-  "last_updated": "2025-12-09T12:04:06.782242",
+  "last_updated": "2025-12-10T05:46:31.853307",
   "employees": [
     {
       "name": "Alyssa R Monaghan",
       "employee_type": "hourly",
       "base_rate": 34.0,
       "qb_indirect_code": "Y - Indirect Employee Labor:ARM",
-      "qb_direct_code": "Y - Direct Employee Labor:Scientist II"
+      "qb_direct_code": "Y - Direct Employee Labor:Scientist II",
+      "paychex_name": ""
     },
     {
       "name": "Amy C. Brown",
       "employee_type": "salaried",
-      "base_rate": 39.86,
+      "base_rate": 38.52,
       "qb_indirect_code": "Y - Indirect Employee Labor:AB",
-      "qb_direct_code": "Y - Direct Employee Labor:Secretary III"
+      "qb_direct_code": "Y - Direct Employee Labor:Secretary III",
+      "paychex_name": ""
     },
     {
       "name": "Andrew B. Shaw",
       "employee_type": "hourly",
       "base_rate": 25.0,
       "qb_indirect_code": "Y - Indirect Employee Labor:ABS",
-      "qb_direct_code": "Y - Direct Employee Labor:Geo Spec I"
+      "qb_direct_code": "Y - Direct Employee Labor:Geo Spec I",
+      "paychex_name": ""
     },
     {
       "name": "Ann L. Clarke",
       "employee_type": "hourly",
       "base_rate": 68.18,
       "qb_indirect_code": "Y - Indirect Employee Labor:ALC",
-      "qb_direct_code": "Y - Direct Employee Labor:Program Specialist I"
+      "qb_direct_code": "Y - Direct Employee Labor:Program Specialist I",
+      "paychex_name": ""
     },
     {
       "name": "Brad A McCalla",
       "employee_type": "salaried",
-      "base_rate": 67.1,
+      "base_rate": 65.46,
       "qb_indirect_code": "Y - Indirect Employee Labor:BAM",
-      "qb_direct_code": "Y - Direct Employee Labor:PM II"
+      "qb_direct_code": "Y - Direct Employee Labor:PM II",
+      "paychex_name": ""
     },
     {
       "name": "Derek J. Horneman",
       "employee_type": "hourly",
       "base_rate": 35.0,
       "qb_indirect_code": "Y - Indirect Employee Labor:DJH",
-      "qb_direct_code": "Y - Direct Employee Labor:Survey Crew Chief"
+      "qb_direct_code": "Y - Direct Employee Labor:Survey Crew Chief",
+      "paychex_name": ""
     },
     {
       "name": "Gabrielle Demosthene",
       "employee_type": "salaried",
-      "base_rate": 35.7,
+      "base_rate": 35.0,
       "qb_indirect_code": "Y - Indirect Employee Labor:GD",
-      "qb_direct_code": "Y - Direct Employee Labor:Cost Analyst"
+      "qb_direct_code": "Y - Direct Employee Labor:Cost Analyst",
+      "paychex_name": ""
     },
     {
       "name": "James R. Ferguson",
       "employee_type": "salaried",
-      "base_rate": 40.66,
+      "base_rate": 39.86,
       "qb_indirect_code": "Y - Indirect Employee Labor:JRF",
-      "qb_direct_code": "Y - Direct Employee Labor:Geologist III"
+      "qb_direct_code": "Y - Direct Employee Labor:Geologist III",
+      "paychex_name": ""
     },
     {
       "name": "Jeffrey A. Liebdzinski",
       "employee_type": "hourly",
-      "base_rate": 39.34,
+      "base_rate": 38.2,
       "qb_indirect_code": "Y - Indirect Employee Labor:JAL",
-      "qb_direct_code": "Y - Direct Employee Labor:Designer"
+      "qb_direct_code": "Y - Direct Employee Labor:Designer",
+      "paychex_name": ""
     },
     {
       "name": "Jeffrey Martinelli",
       "employee_type": "salaried",
       "base_rate": 41.84,
       "qb_indirect_code": "Y - Indirect Employee Labor:JM",
-      "qb_direct_code": "Y - Direct Employee Labor:TMP Comm/Public Outreach Coord"
+      "qb_direct_code": "Y - Direct Employee Labor:TMP Comm/Public Outreach Coord",
+      "paychex_name": ""
     },
     {
       "name": "Liam J. Stubanas",
       "employee_type": "hourly",
-      "base_rate": 34.5,
+      "base_rate": 33.18,
       "qb_indirect_code": "Y - Indirect Employee Labor:LJS",
-      "qb_direct_code": "Y - Direct Employee Labor:Engineering Spec II"
+      "qb_direct_code": "Y - Direct Employee Labor:Engineering Spec II",
+      "paychex_name": ""
     },
     {
       "name": "Lori A. Frye",
       "employee_type": "hourly",
       "base_rate": 45.0,
       "qb_indirect_code": "Y - Indirect Employee Labor:LAF",
-      "qb_direct_code": "Y - Direct Employee Labor:Archaeo. Tech."
+      "qb_direct_code": "Y - Direct Employee Labor:Archaeo. Tech.",
+      "paychex_name": ""
     },
     {
       "name": "Lynn M Tomlinson",
       "employee_type": "hourly",
-      "base_rate": 23.54,
+      "base_rate": 21.4,
       "qb_indirect_code": "Y - Indirect Employee Labor:LMT",
-      "qb_direct_code": "Y - Direct Employee Labor:Secretary I"
+      "qb_direct_code": "Y - Direct Employee Labor:Secretary I",
+      "paychex_name": ""
     },
     {
       "name": "Marcella J. Gallick",
       "employee_type": "salaried",
-      "base_rate": 67.36,
+      "base_rate": 66.36,
       "qb_indirect_code": "Y - Indirect Employee Labor:MG",
       "qb_direct_code": "Y - Direct Employee Labor:PM II",
-      "paychex_name": "Johnson, Marcella G."
+      "paychex_name": ""
     },
     {
       "name": "Mark E. Scappe",
       "employee_type": "salaried",
-      "base_rate": 61.32,
+      "base_rate": 59.82,
       "qb_indirect_code": "Y - Indirect Employee Labor:MES",
-      "qb_direct_code": "Y - Direct Employee Labor:PM II"
+      "qb_direct_code": "Y - Direct Employee Labor:PM II",
+      "paychex_name": ""
     },
     {
       "name": "Marko Milojkovic",
       "employee_type": "hourly",
       "base_rate": 24.0,
       "qb_indirect_code": "Y - Indirect Employee Labor:MM",
-      "qb_direct_code": "Y - Direct Employee Labor:Survey Technician"
+      "qb_direct_code": "Y - Direct Employee Labor:Survey Technician",
+      "paychex_name": ""
     },
     {
       "name": "Megan E. Seivert",
       "employee_type": "hourly",
       "base_rate": 24.04,
       "qb_indirect_code": "Y - Indirect Employee Labor:Mseivert",
-      "qb_direct_code": "Y - Direct Employee Labor:Secretary II"
+      "qb_direct_code": "Y - Direct Employee Labor:Secretary II",
+      "paychex_name": ""
     },
     {
       "name": "Monica L Blasko",
       "employee_type": "hourly",
       "base_rate": 35.0,
       "qb_indirect_code": "Y - Indirect Employee Labor:MB",
-      "qb_direct_code": "Y - Direct Employee Labor:Architectural Spec I"
+      "qb_direct_code": "Y - Direct Employee Labor:Architectural Spec I",
+      "paychex_name": ""
     },
     {
       "name": "Nadia E Johnson",
       "employee_type": "hourly",
-      "base_rate": 33.72,
+      "base_rate": 33.06,
       "qb_indirect_code": "Y - Indirect Employee Labor:NJ",
-      "qb_direct_code": "Y - Direct Employee Labor:Archaeo. II"
+      "qb_direct_code": "Y - Direct Employee Labor:Archaeo. II",
+      "paychex_name": ""
     },
     {
       "name": "Roxanne K. Beall",
       "employee_type": "hourly",
-      "base_rate": 37.26,
+      "base_rate": 35.84,
       "qb_indirect_code": "Y - Indirect Employee Labor:RKB",
-      "qb_direct_code": "Y - Direct Employee Labor:Assist. Proj. Mgr."
+      "qb_direct_code": "Y - Direct Employee Labor:Assist. Proj. Mgr.",
+      "paychex_name": ""
     },
     {
       "name": "Thomas C Smit",
       "employee_type": "hourly",
       "base_rate": 40.0,
       "qb_indirect_code": "Y - Indirect Employee Labor:TCS",
-      "qb_direct_code": "Y - Direct Employee Labor:Chief of Surveys"
+      "qb_direct_code": "Y - Direct Employee Labor:Chief of Surveys",
+      "paychex_name": ""
     },
     {
       "name": "Thomas R. Stahl",
       "employee_type": "salaried",
-      "base_rate": 55.04,
+      "base_rate": 53.42,
       "qb_indirect_code": "Y - Indirect Employee Labor:TRS",
-      "qb_direct_code": "Y - Direct Employee Labor:Engineer IV"
+      "qb_direct_code": "Y - Direct Employee Labor:Engineer IV",
+      "paychex_name": ""
     },
     {
       "name": "William Johnson",
       "employee_type": "hourly",
       "base_rate": 51.5,
       "qb_indirect_code": "Y - Indirect Employee Labor:WJJ",
-      "qb_direct_code": "Y - Direct Employee Labor:Scientist IV"
+      "qb_direct_code": "Y - Direct Employee Labor:Scientist IV",
+      "paychex_name": ""
     },
     {
       "name": "Zoran Milojkovic",
       "employee_type": "hourly",
       "base_rate": 60.0,
       "qb_indirect_code": "Y - Indirect Employee Labor:ZM",
-      "qb_direct_code": "Y - Direct Employee Labor:Chief of Surveys"
+      "qb_direct_code": "Y - Direct Employee Labor:Chief of Surveys",
+      "paychex_name": ""
     }
   ]
 }

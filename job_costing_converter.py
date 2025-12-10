@@ -42,6 +42,48 @@ def determine_week_number(date_str, pay_period_start):
     except:
         return 1
 
+def is_indirect_project(customer_name: str) -> bool:
+    """
+    Determine if a project should use indirect labor codes for QuickBooks.
+
+    A project is INDIRECT if:
+    1. It starts with "Rhea:80" (internal overhead codes like G&A, PTO, Holiday), OR
+    2. It contains "Proposal" anywhere in the name (proposals are indirect costs)
+
+    Otherwise, the project is DIRECT (billable client work).
+
+    Args:
+        customer_name: The "Customer full name" from QuickBooks export
+
+    Returns:
+        True if indirect, False if direct
+    """
+    if not customer_name:
+        return False
+    name_upper = str(customer_name).upper()
+    return name_upper.startswith('RHEA:80') or 'PROPOSAL' in name_upper
+
+
+def get_job_title_from_direct_code(qb_direct_code: str) -> str:
+    """
+    Extract job title from the qb_direct_code field.
+
+    The qb_direct_code format is: "Y - Direct Employee Labor:Job Title"
+    This function extracts the part after the colon.
+
+    Args:
+        qb_direct_code: e.g., "Y - Direct Employee Labor:Scientist II"
+
+    Returns:
+        The job title portion, e.g., "Scientist II"
+    """
+    if not qb_direct_code:
+        return ""
+    if ':' in qb_direct_code:
+        return qb_direct_code.split(':')[-1].strip()
+    return qb_direct_code
+
+
 def create_job_key(employee_name, week, activity_date, customer, hours):
     """
     Create a unique, stable identifier for a job entry.
@@ -162,6 +204,145 @@ def calculate_precise_salaried_amounts(
         running_total += Decimal(str(amounts[customer]))
 
     return amounts, float(precise_rate), float(target), source
+
+
+def generate_by_employee_sheets(
+    writer,
+    df_work: pd.DataFrame,
+    employees_data: dict,
+    employee_total_hours: dict
+):
+    """
+    Generate per-employee Excel sheets in QuickBooks Item import format.
+
+    Creates one sheet per employee with columns matching QB's "Add Item" import:
+    - PRODUCT/SERVICE: The QB labor code (indirect or direct based on project type)
+    - DESCRIPTION: Employee name (indirect) or job title (direct)
+    - QTY: Hours worked
+    - RATE: Hourly rate (may be adjusted for salaried employees >80 hours)
+    - AMOUNT: QTY × RATE
+    - CUSTOMER/PROJECT: The project/customer name
+
+    Args:
+        writer: The pandas ExcelWriter object (already has "Job Cost Allocation" sheet)
+        df_work: DataFrame with processed work data
+        employees_data: Dict of Employee objects from load_employees()
+        employee_total_hours: Dict mapping employee name -> total hours for rate calculation
+
+    Note: This function is called from within the ExcelWriter context of
+    generate_job_cost_allocation_output() to write sheets to the same workbook.
+    """
+    # Sort employees alphabetically for consistent output
+    sorted_employees = sorted(df_work['Employee_Name'].unique())
+
+    for emp_name in sorted_employees:
+        emp_data = df_work[df_work['Employee_Name'] == emp_name].copy()
+
+        # Get employee info from master file
+        emp_info = employees_data.get(emp_name)
+        if not emp_info:
+            print(f"[WARNING] Employee {emp_name} not found in master file, skipping sheet")
+            continue
+
+        # Get rate info
+        total_hours = employee_total_hours.get(emp_name, 80.0)
+        rate, base_rate, is_adjusted = get_employee_rate(emp_name, total_hours)
+        is_salaried = is_employee_salaried(emp_name)
+
+        # Get QB codes
+        qb_indirect = emp_info.qb_indirect_code
+        qb_direct = emp_info.qb_direct_code
+        job_title = get_job_title_from_direct_code(qb_direct)
+
+        # Group by customer/project for this employee
+        emp_summary = emp_data.groupby('Customer full name').agg({
+            'Regular_Hours': 'sum',
+            'OT_Hours': 'sum',
+            'Regular_Cost': 'sum',
+            'OT_Cost': 'sum',
+            'Hourly_Rate': 'first'
+        }).reset_index()
+
+        # Build output rows
+        output_rows = []
+        total_amount = 0.0
+
+        for _, row in emp_summary.iterrows():
+            customer = row['Customer full name']
+            regular_hours = row['Regular_Hours']
+            ot_hours = row['OT_Hours']
+            hourly_rate = row['Hourly_Rate']
+
+            # Determine if this project is indirect or direct
+            is_indirect = is_indirect_project(customer)
+
+            # Add regular hours row
+            if regular_hours > 0:
+                amount = round(regular_hours * hourly_rate, 2)
+                output_rows.append({
+                    'PRODUCT/SERVICE': qb_indirect if is_indirect else qb_direct,
+                    'DESCRIPTION': emp_name if is_indirect else job_title,
+                    'QTY': round(regular_hours, 2),
+                    'RATE': round(hourly_rate, 2),
+                    'AMOUNT': amount,
+                    'CUSTOMER/PROJECT': customer
+                })
+                total_amount += amount
+
+            # Add OT hours row (separate line item with 1.5x rate)
+            # Note: Salaried employees don't have OT hours (they get rate adjustment instead)
+            if ot_hours > 0 and not is_salaried:
+                ot_rate = hourly_rate * 1.5
+                ot_amount = round(ot_hours * ot_rate, 2)
+                output_rows.append({
+                    'PRODUCT/SERVICE': qb_indirect if is_indirect else qb_direct,
+                    'DESCRIPTION': f"{emp_name if is_indirect else job_title} (OT)",
+                    'QTY': round(ot_hours, 2),
+                    'RATE': round(ot_rate, 2),
+                    'AMOUNT': ot_amount,
+                    'CUSTOMER/PROJECT': customer
+                })
+                total_amount += ot_amount
+
+        # Add totals row
+        output_rows.append({
+            'PRODUCT/SERVICE': '',
+            'DESCRIPTION': 'TOTAL',
+            'QTY': sum(r['QTY'] for r in output_rows),
+            'RATE': '',
+            'AMOUNT': round(total_amount, 2),
+            'CUSTOMER/PROJECT': ''
+        })
+
+        # Convert to DataFrame and write to sheet
+        emp_df = pd.DataFrame(output_rows)
+
+        # Excel sheet names have 31 character limit - truncate if needed
+        sheet_name = emp_name[:31] if len(emp_name) > 31 else emp_name
+        emp_df.to_excel(writer, sheet_name=sheet_name, index=False)
+
+        # Format the sheet
+        worksheet = writer.sheets[sheet_name]
+
+        # Set column widths
+        worksheet.column_dimensions['A'].width = 40   # PRODUCT/SERVICE
+        worksheet.column_dimensions['B'].width = 30   # DESCRIPTION
+        worksheet.column_dimensions['C'].width = 10   # QTY
+        worksheet.column_dimensions['D'].width = 12   # RATE
+        worksheet.column_dimensions['E'].width = 12   # AMOUNT
+        worksheet.column_dimensions['F'].width = 50   # CUSTOMER/PROJECT
+
+        # Apply currency formatting to RATE and AMOUNT columns
+        for row_num in range(2, worksheet.max_row + 1):
+            # Format RATE column (D)
+            rate_cell = worksheet.cell(row=row_num, column=4)
+            if rate_cell.value is not None and isinstance(rate_cell.value, (int, float)):
+                rate_cell.number_format = '"$"#,##0.00'
+
+            # Format AMOUNT column (E)
+            amount_cell = worksheet.cell(row=row_num, column=5)
+            if amount_cell.value is not None and isinstance(amount_cell.value, (int, float)):
+                amount_cell.number_format = '"$"#,##0.00'
 
 
 def generate_job_cost_allocation_output(
@@ -389,6 +570,14 @@ def generate_job_cost_allocation_output(
             notes_cell = worksheet.cell(row=row, column=7)
             if notes_cell.value is not None and isinstance(notes_cell.value, (int, float)):
                 notes_cell.number_format = '"$"#,##0.00'
+
+        # Generate per-employee sheets in QuickBooks Item import format
+        generate_by_employee_sheets(
+            writer=writer,
+            df_work=df_work,
+            employees_data=employees_data,
+            employee_total_hours=employee_total_hours
+        )
 
     # Build summary for return
     summary = {
