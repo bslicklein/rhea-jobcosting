@@ -377,6 +377,19 @@ def generate_job_cost_allocation_output(
         worksheet.column_dimensions['F'].width = 12   # Rate Type
         worksheet.column_dimensions['G'].width = 35   # Notes
 
+        # Apply currency formatting to display values with $ and 2 decimal places
+        # This is display-only - does not change the underlying calculated values
+        for row in range(2, worksheet.max_row + 1):
+            # Format Amount column (E) - all numeric values as currency with $
+            amount_cell = worksheet.cell(row=row, column=5)
+            if amount_cell.value is not None and isinstance(amount_cell.value, (int, float)):
+                amount_cell.number_format = '"$"#,##0.00'
+
+            # Format Paychex values in Notes column (G) - only numeric values with $
+            notes_cell = worksheet.cell(row=row, column=7)
+            if notes_cell.value is not None and isinstance(notes_cell.value, (int, float)):
+                notes_cell.number_format = '"$"#,##0.00'
+
     # Build summary for return
     summary = {
         'output_file': output_file,
