@@ -329,7 +329,9 @@ def add_employee():
             employee_type=data['employee_type'],
             base_rate=float(data['base_rate']),
             qb_indirect_code=data.get('qb_indirect_code', ''),
-            qb_direct_code=data.get('qb_direct_code', '')
+            qb_direct_code=data.get('qb_direct_code', ''),
+            paychex_name=data.get('paychex_name', ''),
+            is_owner=data.get('is_owner', False)
         )
 
         if success:
@@ -370,7 +372,9 @@ def update_employee_route():
             employee_type=data['employee_type'],
             base_rate=float(data['base_rate']),
             qb_indirect_code=data.get('qb_indirect_code', ''),
-            qb_direct_code=data.get('qb_direct_code', '')
+            qb_direct_code=data.get('qb_direct_code', ''),
+            paychex_name=data.get('paychex_name', ''),
+            is_owner=data.get('is_owner', False)
         )
 
         if success:

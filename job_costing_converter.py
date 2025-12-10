@@ -6,13 +6,30 @@ import sys
 import json
 from employee_master import (
     is_employee_salaried, get_employee_rate, validate_employees_against_paychex,
-    get_paychex_name_aliases, load_employees
+    get_paychex_name_aliases, load_employees, Employee
 )
 from paychex_parser import parse_paychex_file, match_employees, PaychexEmployee
 from reconciliation import (
     reconcile_employee, generate_reconciliation_report, format_status_emoji,
     format_rate_note, get_reconciliation_summary, ReconciliationReport
 )
+
+
+def is_employee_owner(employee_name: str) -> bool:
+    """
+    Check if an employee is an owner taking distributions.
+
+    Owners are excluded from job costing because they have no labor cost -
+    their compensation comes from company profits, not wages.
+    Their time entries remain in QuickBooks for client billing purposes.
+
+    Returns: True if owner, False otherwise (or if unknown employee)
+    """
+    employees = load_employees()
+    if employee_name not in employees:
+        return False
+    return employees[employee_name].is_owner
+
 
 def parse_duration_to_hours(duration_str):
     """
@@ -644,6 +661,11 @@ def detect_overtime_and_prepare_selection(week1_file, week2_file):
 
     df_work = df_combined[df_combined['Employee_Name'].notna()].copy()
 
+    # Filter out owner employees (they take distributions, not paychecks)
+    owner_employees = [emp for emp in df_work['Employee_Name'].unique() if is_employee_owner(emp)]
+    if owner_employees:
+        df_work = df_work[~df_work['Employee_Name'].isin(owner_employees)]
+
     if len(df_work) == 0:
         return None, None
 
@@ -812,7 +834,18 @@ def process_paychex_files(week1_file, week2_file, output_file='job_costing_outpu
 
     # Remove rows without employee names (header rows, total rows, etc.)
     df_work = df_combined[df_combined['Employee_Name'].notna()].copy()
-    
+
+    # Filter out owner employees (they take distributions, not paychecks)
+    # Their time is tracked for client billing, but not job costed
+    owner_employees = [emp for emp in df_work['Employee_Name'].unique() if is_employee_owner(emp)]
+    if owner_employees:
+        print(f"ℹ️  Excluding {len(owner_employees)} owner(s) from job costing (no labor cost):")
+        for owner in owner_employees:
+            owner_hours = df_work[df_work['Employee_Name'] == owner]['Hours_Decimal'].sum()
+            print(f"   - {owner} ({owner_hours:.1f} hours tracked for billing only)")
+        df_work = df_work[~df_work['Employee_Name'].isin(owner_employees)]
+        print()
+
     print(f"✓ Cleaned data: {len(df_work)} work records found")
     print(f"✓ Employees found: {df_work['Employee_Name'].nunique()}")
     print()

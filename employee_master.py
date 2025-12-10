@@ -26,6 +26,7 @@ class Employee:
     qb_indirect_code: str = ""   # QuickBooks indirect labor code
     qb_direct_code: str = ""     # QuickBooks direct labor code
     paychex_name: str = ""       # Name as it appears in Paychex (if different from QB)
+    is_owner: bool = False       # True for owners taking distributions (excluded from job costing)
 
     def is_salaried(self) -> bool:
         return self.employee_type.lower() == 'salaried'
@@ -36,6 +37,14 @@ class Employee:
     def get_paychex_name(self) -> str:
         """Get the Paychex name (uses QB name if no alias set)."""
         return self.paychex_name if self.paychex_name else self.name
+
+    def should_job_cost(self) -> bool:
+        """Check if this employee should be included in job costing calculations.
+
+        Owners taking distributions are excluded because they have no labor cost -
+        their compensation comes from profits, not wages.
+        """
+        return not self.is_owner
 
 
 def load_employees(filepath: str = DEFAULT_EMPLOYEES_FILE) -> Dict[str, Employee]:
@@ -59,7 +68,8 @@ def load_employees(filepath: str = DEFAULT_EMPLOYEES_FILE) -> Dict[str, Employee
                 base_rate=float(emp_data['base_rate']),
                 qb_indirect_code=emp_data.get('qb_indirect_code', ''),
                 qb_direct_code=emp_data.get('qb_direct_code', ''),
-                paychex_name=emp_data.get('paychex_name', '')
+                paychex_name=emp_data.get('paychex_name', ''),
+                is_owner=emp_data.get('is_owner', False)
             )
             employees[emp.name] = emp
 
@@ -103,7 +113,8 @@ def get_employee_list() -> List[Dict]:
             'qb_indirect_code': emp.qb_indirect_code,
             'qb_direct_code': emp.qb_direct_code,
             'paychex_name': emp.paychex_name,
-            'is_salaried': emp.is_salaried()
+            'is_salaried': emp.is_salaried(),
+            'is_owner': emp.is_owner
         }
         for emp in employees.values()
     ]
@@ -125,7 +136,7 @@ def get_paychex_name_aliases() -> Dict[str, str]:
 
 def update_employee(name: str, employee_type: str, base_rate: float,
                    qb_indirect_code: str = "", qb_direct_code: str = "",
-                   paychex_name: str = "") -> bool:
+                   paychex_name: str = "", is_owner: bool = False) -> bool:
     """
     Add or update a single employee
     """
@@ -136,7 +147,8 @@ def update_employee(name: str, employee_type: str, base_rate: float,
         base_rate=base_rate,
         qb_indirect_code=qb_indirect_code,
         qb_direct_code=qb_direct_code,
-        paychex_name=paychex_name
+        paychex_name=paychex_name,
+        is_owner=is_owner
     )
     return save_employees(employees)
 
@@ -262,7 +274,8 @@ def bulk_update_employees(employees_data: List[Dict]) -> bool:
             base_rate=float(emp_data['base_rate']),
             qb_indirect_code=emp_data.get('qb_indirect_code', ''),
             qb_direct_code=emp_data.get('qb_direct_code', ''),
-            paychex_name=emp_data.get('paychex_name', '')
+            paychex_name=emp_data.get('paychex_name', ''),
+            is_owner=emp_data.get('is_owner', False)
         )
     return save_employees(employees)
 

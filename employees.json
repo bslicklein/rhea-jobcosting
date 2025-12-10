@@ -111,7 +111,7 @@
       "base_rate": 66.36,
       "qb_indirect_code": "Y - Indirect Employee Labor:MG",
       "qb_direct_code": "Y - Direct Employee Labor:PM II",
-      "paychex_name": ""
+      "paychex_name": "Johnson, Marcella G."
     },
     {
       "name": "Mark E. Scappe",
@@ -183,7 +183,8 @@
       "base_rate": 51.5,
       "qb_indirect_code": "Y - Indirect Employee Labor:WJJ",
       "qb_direct_code": "Y - Direct Employee Labor:Scientist IV",
-      "paychex_name": ""
+      "paychex_name": "",
+      "is_owner": true
     },
     {
       "name": "Zoran Milojkovic",
